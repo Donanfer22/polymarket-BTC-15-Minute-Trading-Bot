@@ -1368,20 +1368,33 @@ def run_integrated_bot(simulation: bool = False, enable_grafana: bool = True, te
         use_gamma_markets=True,
     )
 
+    # Polymarket L2 requer chave, secret e passphrase juntos.
+    # Se faltar algum, forçamos None para que o Nautilus auto-derive a sessão L2 via Private Key + Funder.
+    api_key = os.getenv("POLYMARKET_API_KEY")
+    api_secret = os.getenv("POLYMARKET_API_SECRET")
+    passphrase = os.getenv("POLYMARKET_PASSPHRASE")
+
+    if not (api_key and api_secret and passphrase):
+        api_key = None
+        api_secret = None
+        passphrase = None
+
     poly_data_cfg = PolymarketDataClientConfig(
         private_key=os.getenv("POLYMARKET_PK"),
-        api_key=os.getenv("POLYMARKET_API_KEY"),
-        api_secret=os.getenv("POLYMARKET_API_SECRET"),
-        passphrase=os.getenv("POLYMARKET_PASSPHRASE"),
+        api_key=api_key,
+        api_secret=api_secret,
+        passphrase=passphrase,
+        funder=os.getenv("POLYMARKET_API_KEY_ADDRESS"),
         signature_type=1,
         instrument_provider=instrument_cfg,
     )
 
     poly_exec_cfg = PolymarketExecClientConfig(
         private_key=os.getenv("POLYMARKET_PK"),
-        api_key=os.getenv("POLYMARKET_API_KEY"),
-        api_secret=os.getenv("POLYMARKET_API_SECRET"),
-        passphrase=os.getenv("POLYMARKET_PASSPHRASE"),
+        api_key=api_key,
+        api_secret=api_secret,
+        passphrase=passphrase,
+        funder=os.getenv("POLYMARKET_API_KEY_ADDRESS"),
         signature_type=1,
         instrument_provider=instrument_cfg,
     )
