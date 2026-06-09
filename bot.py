@@ -139,6 +139,8 @@ class IntegratedBTCStrategy(Strategy):
 
     def __init__(self, redis_client=None, enable_grafana=True, test_mode=False):
         super().__init__()
+        
+        self.loop = asyncio.get_event_loop()
 
         self.bot_start_time = datetime.now(timezone.utc)
         self.restart_after_minutes = 90
@@ -810,10 +812,15 @@ class IntegratedBTCStrategy(Strategy):
     # ------------------------------------------------------------------
 
     def _make_trading_decision_sync(self, current_price: float, strategy_profile: str = "snowball"):
-        asyncio.run_coroutine_threadsafe(
-            self._make_trading_decision(Decimal(str(current_price)), strategy_profile),
-            self.loop
-        )
+        try:
+            future = asyncio.run_coroutine_threadsafe(
+                self._make_trading_decision(Decimal(str(current_price)), strategy_profile),
+                self.loop
+            )
+            # Wait for it to finish and catch any exceptions
+            future.result(timeout=15.0)
+        except Exception as e:
+            logger.error(f"FATAL ERROR in _make_trading_decision: {e}", exc_info=True)
             
     async def _fetch_market_context(self, current_price: Decimal) -> dict:
         """
@@ -1154,17 +1161,15 @@ class IntegratedBTCStrategy(Strategy):
             with open('paper_trades.json', 'r') as f:
                 trades_data = json.load(f)
                 for t in trades_data:
-                    # Reconstruct PaperTrade objects
                     pt = PaperTrade(
-                        trade_id=t['trade_id'],
+                        timestamp=parse(t['timestamp']),
                         direction=t['direction'],
-                        size=Decimal(str(t['size'])),
-                        entry_price=Decimal(str(t['entry_price'])),
-                        entry_time=parse(t['entry_time'])
+                        size_usd=float(t['size_usd']),
+                        price=float(t['price']),
+                        signal_score=float(t.get('signal_score', 0.0)),
+                        signal_confidence=float(t.get('signal_confidence', 0.0)),
+                        outcome=t.get('outcome', 'PENDING')
                     )
-                    pt.exit_price = Decimal(str(t['exit_price'])) if t.get('exit_price') else None
-                    pt.exit_time = parse(t['exit_time']) if t.get('exit_time') else None
-                    pt.pnl = Decimal(str(t['pnl'])) if t.get('pnl') is not None else Decimal("0")
                     self.paper_trades.append(pt)
         except Exception as e:
             logger.warning(f"Failed to load previous paper trades: {e}")
