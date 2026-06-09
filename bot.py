@@ -164,6 +164,8 @@ class IntegratedBTCStrategy(Strategy):
         self.last_trade_time = -1  # Force first trade immediately!
         self._waiting_for_market_open = False  # True when waiting for a future market to open
         self._last_bid_ask = None  # (bid_decimal, ask_decimal) from last tick, for liquidity checks
+        self._last_heartbeat_time = 0  # To print periodic logs and avoid dead silence
+        self._last_logged_price = 0.0  # Track significant price changes for live feed
 
         # Tick buffer: rolling 90s of ticks for TickVelocityProcessor
         from collections import deque
@@ -210,7 +212,11 @@ class IntegratedBTCStrategy(Strategy):
         self.fusion_engine.set_weight("SentimentAnalysis",  0.05)  # daily F&G (weak)
 
         # Phase 5: Risk Management
+        # Initialize Risk Engine with much higher max limits
+        # so it doesn't block the dynamic Trade Size from the Dashboard
         self.risk_engine = get_risk_engine()
+        self.risk_engine.limits.max_position_size = Decimal("100000.0")
+        self.risk_engine.limits.max_total_exposure = Decimal("1000000.0")
 
         # Phase 6: Performance Tracking
         self.performance_tracker = get_performance_tracker()
@@ -230,6 +236,7 @@ class IntegratedBTCStrategy(Strategy):
 
         # Paper trading tracker
         self.paper_trades: List[PaperTrade] = []
+        self._load_paper_trades()
 
         self.test_mode = test_mode
 
@@ -286,12 +293,19 @@ class IntegratedBTCStrategy(Strategy):
     async def check_simulation_mode(self) -> bool:
         """Check Redis for current simulation mode."""
         if not self.redis_client:
-            return self.current_simulation_mode
+            return getattr(self, 'current_simulation_mode', True)
         try:
             sim_mode = self.redis_client.get('btc_trading:simulation_mode')
             if sim_mode is not None:
+                if sim_mode == '-1':
+                    if not getattr(self, 'redis_paused', False):
+                        logger.warning("Bot is STOPPED via Redis")
+                    self.redis_paused = True
+                    return getattr(self, 'current_simulation_mode', True)
+                
+                self.redis_paused = False
                 redis_simulation = sim_mode == '1'
-                if redis_simulation != self.current_simulation_mode:
+                if getattr(self, 'current_simulation_mode', None) != redis_simulation:
                     self.current_simulation_mode = redis_simulation
                     mode_text = "SIMULATION" if redis_simulation else "LIVE TRADING"
                     logger.warning(f"Trading mode changed to: {mode_text}")
@@ -300,7 +314,7 @@ class IntegratedBTCStrategy(Strategy):
                 return redis_simulation
         except Exception as e:
             logger.warning(f"Failed to check Redis simulation mode: {e}")
-        return self.current_simulation_mode
+        return getattr(self, 'current_simulation_mode', True)
 
     # ------------------------------------------------------------------
     # Strategy lifecycle
@@ -545,8 +559,8 @@ class IntegratedBTCStrategy(Strategy):
         
         logger.info("=" * 80)
         logger.info(f"SWITCHING TO NEXT MARKET: {next_market['slug']}")
-        logger.info(f"  Current time: {now.strftime('%H:%M:%S')}")
-        logger.info(f"  Market ends at: {self.next_switch_time.strftime('%H:%M:%S')}")
+        logger.info(f"  Current time: {now.strftime('%H:%M:%S')} (UTC)")
+        logger.info(f"  Market ends at: {self.next_switch_time.strftime('%H:%M:%S')} (UTC)")
         logger.info("=" * 80)
         
         # =========================================================================
@@ -583,6 +597,8 @@ class IntegratedBTCStrategy(Strategy):
         Also handles the case where we're waiting for a future market to open.
         """
         while True:
+            await self.check_simulation_mode()
+
             # --- auto-restart check ---
             uptime_minutes = (datetime.now(timezone.utc) - self.bot_start_time).total_seconds() / 60
             if uptime_minutes >= self.restart_after_minutes:
@@ -624,6 +640,10 @@ class IntegratedBTCStrategy(Strategy):
     def on_quote_tick(self, tick: QuoteTick):
         """Handle quote tick - TRADE when market opens and at each 15-min boundary"""
         try:
+            # Check for STOPPED mode without blocking
+            if getattr(self, 'redis_paused', False):
+                return
+
             # Only process ticks from current instrument
             if self.instrument_id is None or tick.instrument_id != self.instrument_id:
                 return
@@ -726,9 +746,47 @@ class IntegratedBTCStrategy(Strategy):
             #   1.9 shares = price $0.53 → weak trend, near coin flip
             #   2.0+ shares = price $0.50 → pure coin flip, SKIP
             # =========================================================================
+            # =========================================================================
             seconds_into_sub_interval = elapsed_secs % MARKET_INTERVAL_SECONDS
-            TRADE_WINDOW_START = 780   # 13 minutes in
-            TRADE_WINDOW_END   = 840   # 14 minutes in (60s window)
+            
+            # --- Dynamic Profile Loading ---
+            strategy_profile = "snowball"
+            if getattr(self, 'redis_client', None):
+                try:
+                    cred_json = self.redis_client.get('btc_trading:credentials')
+                    if cred_json:
+                        import json
+                        creds = json.loads(cred_json)
+                        strategy_profile = creds.get('strategy_profile', 'snowball')
+                except Exception as e:
+                    pass
+
+            if strategy_profile == "sniper":
+                TRADE_WINDOW_START = 480   # 8 minutes in
+                TRADE_WINDOW_END   = 600   # 10 minutes in (120s window)
+            elif strategy_profile == "reversal":
+                TRADE_WINDOW_START = 180   # 3 minutes in
+                TRADE_WINDOW_END   = 480   # 8 minutes in (300s window)
+            else: # snowball or default
+                TRADE_WINDOW_START = 780   # 13 minutes in
+                TRADE_WINDOW_END   = 840   # 14 minutes in (60s window)
+
+            # --- HEARTBEAT LOG FOR DASHBOARD (A CADA 60 SEGUNDOS) ---
+            if now.timestamp() - self._last_heartbeat_time >= 60:
+                self._last_heartbeat_time = now.timestamp()
+                time_to_window = TRADE_WINDOW_START - seconds_into_sub_interval
+                if time_to_window > 0:
+                    mins = int(time_to_window // 60)
+                    secs = int(time_to_window % 60)
+                    logger.info(f"⏳ Status do Motor: Aguardando momento exato do ataque (Faltam {mins}m {secs}s)")
+                elif seconds_into_sub_interval >= TRADE_WINDOW_END:
+                    logger.info(f"⏳ Status do Motor: Aguardando abertura do próximo mercado de 15m")
+
+            # --- LIVE TICKER FOR DASHBOARD (QUANDO MOVE > 1%) ---
+            if abs(float(mid_price) - self._last_logged_price) >= 0.01:
+                self._last_logged_price = float(mid_price)
+                trend = "🟢 Tendência de ALTA" if float(mid_price) >= 0.50 else "🔴 Tendência de BAIXA"
+                logger.info(f"📊 Mercado Movendo: Probabilidade de vitória no {trend} está em {float(mid_price)*100:.1f}%")
 
             if TRADE_WINDOW_START <= seconds_into_sub_interval < TRADE_WINDOW_END and trade_key != self.last_trade_time:
                 self.last_trade_time = trade_key
@@ -742,7 +800,7 @@ class IntegratedBTCStrategy(Strategy):
                 logger.info(f"   Price history: {len(self.price_history)} points")
                 logger.info("=" * 80)
 
-                self.run_in_executor(lambda: self._make_trading_decision_sync(float(mid_price)))
+                self.run_in_executor(lambda: self._make_trading_decision_sync(float(mid_price), strategy_profile))
 
         except Exception as e:
             logger.error(f"Error processing quote tick: {e}")
@@ -751,28 +809,11 @@ class IntegratedBTCStrategy(Strategy):
     # Trading decision (unchanged)
     # ------------------------------------------------------------------
 
-    def _make_trading_decision_sync(self, current_price):
-        from decimal import Decimal
-        price_decimal = Decimal(str(current_price))
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        try:
-            loop.run_until_complete(self._make_trading_decision(price_decimal))
-        finally:
-            loop.close()
-    
-    def _make_trading_decision_sync(self, current_price):
-        """Synchronous wrapper for trading decision (called from executor)."""
-        # Convert float back to Decimal for processing
-        from decimal import Decimal
-        price_decimal = Decimal(str(current_price))
-        
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        try:
-            loop.run_until_complete(self._make_trading_decision(price_decimal))
-        finally:
-            loop.close()
+    def _make_trading_decision_sync(self, current_price: float, strategy_profile: str = "snowball"):
+        asyncio.run_coroutine_threadsafe(
+            self._make_trading_decision(Decimal(str(current_price)), strategy_profile),
+            self.loop
+        )
             
     async def _fetch_market_context(self, current_price: Decimal) -> dict:
         """
@@ -850,7 +891,7 @@ class IntegratedBTCStrategy(Strategy):
         )
         return metadata
 
-    async def _make_trading_decision(self, current_price: Decimal):
+    async def _make_trading_decision(self, current_price: Decimal, strategy_profile: str = "snowball"):
         """
         Make trading decision using our 7-phase system.
 
@@ -900,47 +941,86 @@ class IntegratedBTCStrategy(Strategy):
             f"(score={fused.score:.1f}, confidence={fused.confidence:.2%})"
         )
 
-        # --- Phase 5: Position size is always exactly $1.00 ---
-        POSITION_SIZE_USD = Decimal("1.00")
-
+        # --- Phase 5: Position size is configurable via Dashboard (Redis) ---
+        import os
+        import json
+        trade_size_val = os.getenv("MARKET_BUY_USD", "1.00")
+        if getattr(self, 'redis_client', None):
+            try:
+                cred_json = self.redis_client.get('btc_trading:credentials')
+                if cred_json:
+                    creds = json.loads(cred_json)
+                    if 'trade_size' in creds:
+                        trade_size_val = str(creds['trade_size'])
+            except Exception as e:
+                logger.error(f"Error reading trade_size from Redis: {e}")
+        
         # =========================================================================
-        # TREND FILTER — replaces signal-based direction at the late trade window
-        #
-        # At minute 13, the Polymarket price IS the market's verdict on BTC direction.
-        # We ignore what the signal processors say and simply follow the price:
-        #
-        #   price > 0.60 → market says UP with >60% confidence → buy YES
-        #   price < 0.40 → market says DOWN with >60% confidence → buy NO
-        #   price 0.40–0.60 → too close to call → SKIP (this is where we were losing)
-        #
-        # This directly addresses the observation that trades at 1.9–2.0+ shares
-        # (price near $0.50) almost always lose, while trades at 1.4 shares
-        # (price ~$0.71) mostly win.
+        # TREND FILTER & STRATEGY PROFILES
         # =========================================================================
-        TREND_UP_THRESHOLD   = 0.60   # price above this → buy YES (UP)
-        TREND_DOWN_THRESHOLD = 0.40   # price below this → buy NO (DOWN)
-
         price_float = float(current_price)
+        direction = None
+        trend_confidence = 0.0
 
-        if price_float > TREND_UP_THRESHOLD:
-            direction = "long"
-            trend_confidence = price_float  # e.g. 0.72 = 72% confident UP
-            logger.info(
-                f" TREND: UP ({price_float:.2%} YES probability) → buying YES"
-            )
-        elif price_float < TREND_DOWN_THRESHOLD:
-            direction = "short"
-            trend_confidence = 1.0 - price_float  # e.g. 0.31 price = 69% confident DOWN
-            logger.info(
-                f" TREND: DOWN ({price_float:.2%} YES probability = {1-price_float:.2%} NO) → buying NO"
-            )
-        else:
-            logger.info(
-                f"⏭ TREND: NEUTRAL ({price_float:.2%}) — price too close to 0.50, SKIPPING trade "
-                f"(coin flip territory: {TREND_DOWN_THRESHOLD:.0%}–{TREND_UP_THRESHOLD:.0%})"
-            )
+        if strategy_profile == "sniper":
+            # Early Sniper (Minute 8): Trust fused signal if confidence > 75%
+            logger.info("  [Profile: Sniper Antecipado ativado]")
+            if fused.confidence > 0.75:
+                direction = fused.direction.value.lower()
+                trend_confidence = fused.confidence
+                logger.info(f" TREND: Sniper confiante no sinal {direction.upper()} ({fused.confidence:.2%})")
+            else:
+                logger.info(f" TREND: Sniper ignorou sinal (confiança {fused.confidence:.2%} < 75%)")
+
+        elif strategy_profile == "reversal":
+            # Reversal Hunter (Minute 3): Look for extremes vs signal
+            logger.info("  [Profile: Caçador de Reversão ativado]")
+            if price_float > 0.70 and fused.direction.value.lower() == "short" and fused.confidence > 0.65:
+                direction = "short"
+                trend_confidence = fused.confidence
+                logger.info(f" TREND: Reversão Detectada! Preço alto ({price_float}) mas fluxo é SHORT. Apostando no Derretimento (NO)!")
+            elif price_float < 0.30 and fused.direction.value.lower() == "long" and fused.confidence > 0.65:
+                direction = "long"
+                trend_confidence = fused.confidence
+                logger.info(f" TREND: Reversão Detectada! Preço baixo ({price_float}) mas fluxo é LONG. Apostando no Pulo (YES)!")
+            else:
+                logger.info(" TREND: Nenhuma assimetria de reversão extrema encontrada no momento.")
+
+        else: # snowball
+            # Snowball (Minute 13): Follow the strict price trend
+            logger.info("  [Profile: Bola de Neve (Conservador) ativado]")
+            TREND_UP_THRESHOLD   = 0.60   # price above this → buy YES (UP)
+            TREND_DOWN_THRESHOLD = 0.40   # price below this → buy NO (DOWN)
+
+            if price_float > TREND_UP_THRESHOLD:
+                direction = "long"
+                trend_confidence = price_float  # e.g. 0.72 = 72% confident UP
+                logger.info(f" TREND: UP ({price_float:.2%} YES probability) → buying YES")
+            elif price_float < TREND_DOWN_THRESHOLD:
+                direction = "short"
+                trend_confidence = 1.0 - price_float  # e.g. 0.28 price = 72% confident DOWN
+                logger.info(f" TREND: DOWN ({(1.0 - price_float):.2%} NO probability) → buying NO")
+            else:
+                logger.info(f" TREND: NEUTRAL (price {price_float:.4f} is between {TREND_DOWN_THRESHOLD} and {TREND_UP_THRESHOLD}) → SKIP")
+
+        if not direction:
             return
 
+        # --- Position Sizing based on profile ---
+        if strategy_profile == "snowball":
+            # Calculate 20% of compounded bankroll
+            # Bankroll starts at 100.0, we add PNL of all past trades
+            base_bankroll = 100.0
+            total_pnl = sum(float(pt.pnl) for pt in self.paper_trades if pt.outcome != "PENDING")
+            current_bankroll = base_bankroll + total_pnl
+            if current_bankroll < 10.0: current_bankroll = 10.0 # floor
+            dynamic_size = current_bankroll * 0.20
+            POSITION_SIZE_USD = Decimal(str(round(dynamic_size, 2)))
+            logger.info(f"  [Snowball] Banca Simulada: ${current_bankroll:.2f} | 20% = Entrada de ${float(POSITION_SIZE_USD):.2f}")
+        else:
+            # Sniper and Reversal use fixed dashboard size
+            POSITION_SIZE_USD = Decimal(trade_size_val)
+        
         # Risk engine: only check position-count / exposure limits (no sizing math)
         is_valid, error = self.risk_engine.validate_new_position(
             size=POSITION_SIZE_USD,
@@ -951,7 +1031,7 @@ class IntegratedBTCStrategy(Strategy):
             logger.warning(f"Risk engine blocked trade: {error}")
             return
 
-        logger.info(f"Position size: $1.00 (fixed) | Direction: {direction.upper()}")
+        logger.info(f"Position size: ${float(POSITION_SIZE_USD):.2f} | Direction: {direction.upper()}")
 
         # --- Liquidity guard: don't place if market has no real depth ---
         # The current bid/ask come from the last processed quote tick.
@@ -984,20 +1064,32 @@ class IntegratedBTCStrategy(Strategy):
         exit_delta = timedelta(minutes=1) if self.test_mode else timedelta(minutes=15)
         exit_time = datetime.now(timezone.utc) + exit_delta
 
-        if "BULLISH" in str(signal.direction):
-            movement = random.uniform(-0.02, 0.08)
+        # Polymarket Binary Resolution Simulation
+        # If we buy LONG (YES), our win probability is the current YES price.
+        # If we buy SHORT (NO), our win probability is (1 - current YES price).
+        price_float = float(current_price)
+        win_probability = price_float if direction == "long" else (1.0 - price_float)
+
+        # We roll the dice based on the actual market probability
+        is_win = random.random() < win_probability
+
+        # Calculate PnL based on $1.00 position size
+        # Shares bought = Size / Price
+        entry_price_side = price_float if direction == "long" else (1.0 - price_float)
+        shares = float(position_size) / entry_price_side
+
+        if is_win:
+            # Win: shares resolve to $1.00 each
+            pnl = (shares * 1.0) - float(position_size)
+            outcome = "WIN"
+            exit_price_log = 1.00 if direction == "long" else 0.00
         else:
-            movement = random.uniform(-0.08, 0.02)
+            # Loss: shares resolve to $0.00
+            pnl = -float(position_size)
+            outcome = "LOSS"
+            exit_price_log = 0.00 if direction == "long" else 1.00
 
-        exit_price = current_price * (Decimal("1.0") + Decimal(str(movement)))
-        exit_price = max(Decimal("0.01"), min(Decimal("0.99"), exit_price))
-
-        if direction == "long":
-            pnl = position_size * (exit_price - current_price) / current_price
-        else:
-            pnl = position_size * (current_price - exit_price) / current_price
-
-        outcome = "WIN" if pnl > 0 else "LOSS"
+        exit_price = Decimal(str(exit_price_log))
         paper_trade = PaperTrade(
             timestamp=datetime.now(timezone.utc),
             direction=direction.upper(),
@@ -1036,7 +1128,7 @@ class IntegratedBTCStrategy(Strategy):
         logger.info(f"  Size: ${float(position_size):.2f}")
         logger.info(f"  Entry Price: ${float(current_price):,.4f}")
         logger.info(f"  Simulated Exit: ${float(exit_price):,.4f}")
-        logger.info(f"  Simulated P&L: ${float(pnl):+.2f} ({movement*100:+.2f}%)")
+        logger.info(f"  Simulated P&L: ${float(pnl):+.2f}")
         logger.info(f"  Outcome: {outcome}")
         logger.info(f"  Total Paper Trades: {len(self.paper_trades)}")
         logger.info("=" * 80)
@@ -1051,6 +1143,31 @@ class IntegratedBTCStrategy(Strategy):
                 json.dump(trades_data, f, indent=2)
         except Exception as e:
             logger.error(f"Failed to save paper trades: {e}")
+
+    def _load_paper_trades(self):
+        import json
+        import os
+        from dateutil.parser import parse
+        if not os.path.exists('paper_trades.json'):
+            return
+        try:
+            with open('paper_trades.json', 'r') as f:
+                trades_data = json.load(f)
+                for t in trades_data:
+                    # Reconstruct PaperTrade objects
+                    pt = PaperTrade(
+                        trade_id=t['trade_id'],
+                        direction=t['direction'],
+                        size=Decimal(str(t['size'])),
+                        entry_price=Decimal(str(t['entry_price'])),
+                        entry_time=parse(t['entry_time'])
+                    )
+                    pt.exit_price = Decimal(str(t['exit_price'])) if t.get('exit_price') else None
+                    pt.exit_time = parse(t['exit_time']) if t.get('exit_time') else None
+                    pt.pnl = Decimal(str(t['pnl'])) if t.get('pnl') is not None else Decimal("0")
+                    self.paper_trades.append(pt)
+        except Exception as e:
+            logger.warning(f"Failed to load previous paper trades: {e}")
 
     # ------------------------------------------------------------------
     # Real order (unchanged)
@@ -1304,6 +1421,16 @@ class IntegratedBTCStrategy(Strategy):
 # Runner
 # ---------------------------------------------------------------------------
 
+def setup_redis_logging(redis_client):
+    """Broadcast loguru logs to Redis PubSub for the dashboard terminal."""
+    if not redis_client: return
+    def redis_sink(message):
+        try:
+            redis_client.publish('btc_trading:live_logs', str(message).strip())
+        except:
+            pass
+    logger.add(redis_sink, format="{message}")
+
 def run_integrated_bot(simulation: bool = False, enable_grafana: bool = True, test_mode: bool = False):
     """Run the integrated BTC 15-min trading bot - LOADS ALL BTC MARKETS FOR THE DAY"""
     
@@ -1313,18 +1440,18 @@ def run_integrated_bot(simulation: bool = False, enable_grafana: bool = True, te
     print("=" * 80)
 
     redis_client = init_redis()
+    setup_redis_logging(redis_client)
 
     if redis_client:
         try:
-            # ALWAYS overwrite Redis with the current session mode.
-            # This prevents a stale value from a previous --live run
-            # silently overriding --test-mode or --simulation runs.
-            mode_value = '1' if simulation else '0'
-            redis_client.set('btc_trading:simulation_mode', mode_value)
-            mode_label = 'SIMULATION' if simulation else 'LIVE'
-            logger.info(f"Redis simulation_mode forced to: {mode_label} ({mode_value})")
+            # Maintain current mode if it exists
+            mode = redis_client.get('btc_trading:simulation_mode')
+            if mode is None:
+                mode_value = '1' if simulation else '0'
+                redis_client.set('btc_trading:simulation_mode', mode_value)
+                logger.info(f"Redis simulation_mode initialized to: {mode_value}")
         except Exception as e:
-            logger.warning(f"Could not set Redis simulation mode: {e}")
+            logger.warning(f"Could not interact with Redis simulation mode: {e}")
 
     print(f"\nConfiguration:")
     print(f"  Initial Mode: {'SIMULATION' if simulation else 'LIVE TRADING'}")
@@ -1369,10 +1496,24 @@ def run_integrated_bot(simulation: bool = False, enable_grafana: bool = True, te
     )
 
     # Polymarket L2 requer chave, secret e passphrase juntos.
-    # Se faltar algum, forçamos None para que o Nautilus auto-derive a sessão L2 via Private Key + Funder.
+    # Load credentials prioritizing Redis over .env
     api_key = os.getenv("POLYMARKET_API_KEY")
     api_secret = os.getenv("POLYMARKET_API_SECRET")
     passphrase = os.getenv("POLYMARKET_PASSPHRASE")
+    private_key = os.getenv("POLYMARKET_PK")
+
+    if redis_client:
+        try:
+            import json
+            cred_json = redis_client.get('btc_trading:credentials')
+            if cred_json:
+                creds = json.loads(cred_json)
+                if creds.get("api_key"): api_key = creds["api_key"]
+                if creds.get("api_secret"): api_secret = creds["api_secret"]
+                if creds.get("api_passphrase"): passphrase = creds["api_passphrase"]
+                if creds.get("private_key"): private_key = creds["private_key"]
+        except Exception as e:
+            logger.warning(f"Failed to load credentials from Redis: {e}")
 
     if not (api_key and api_secret and passphrase):
         api_key = None
@@ -1380,7 +1521,7 @@ def run_integrated_bot(simulation: bool = False, enable_grafana: bool = True, te
         passphrase = None
 
     poly_data_cfg = PolymarketDataClientConfig(
-        private_key=os.getenv("POLYMARKET_PK"),
+        private_key=private_key,
         api_key=api_key,
         api_secret=api_secret,
         passphrase=passphrase,
@@ -1390,7 +1531,7 @@ def run_integrated_bot(simulation: bool = False, enable_grafana: bool = True, te
     )
 
     poly_exec_cfg = PolymarketExecClientConfig(
-        private_key=os.getenv("POLYMARKET_PK"),
+        private_key=private_key,
         api_key=api_key,
         api_secret=api_secret,
         passphrase=passphrase,

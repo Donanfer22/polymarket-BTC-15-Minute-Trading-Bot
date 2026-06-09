@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polymarket BTC Bot Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+    <div class="background-effects">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <!-- LOGIN OVERLAY -->
+    <div id="login-overlay" class="overlay active">
+        <div class="glass-panel login-box">
+            <div class="logo-area" style="justify-content: center; margin-bottom: 2rem;">
+                <i class="ph ph-robot" style="font-size: 3rem;"></i>
+                <div class="logo-text">
+                    <h1>BTC Bot</h1>
+                    <span class="version">Secure Access</span>
+                </div>
+            </div>
+            <form id="login-form">
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" id="login-user" required autocomplete="username">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="login-pass" required autocomplete="current-password">
+                </div>
+                <p id="login-error" class="error-msg"></p>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    <i class="ph ph-lock-key"></i> LOGIN
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="overlay">
+        <div class="glass-panel settings-box">
+            <div class="panel-header" style="justify-content: space-between;">
+                <h2><i class="ph ph-gear"></i> Settings & Credentials</h2>
+                <button class="btn btn-icon" onclick="closeSettings()"><i class="ph ph-x"></i></button>
+            </div>
+            <form id="settings-form">
+                <div class="input-group">
+                    <label>Polymarket API Key</label>
+                    <input type="text" id="set-api-key" placeholder="Enter API Key">
+                </div>
+                <div class="input-group">
+                    <label>Polymarket API Secret</label>
+                    <input type="password" id="set-api-secret" placeholder="Enter Secret">
+                </div>
+                <div class="input-group">
+                    <label>Polymarket Passphrase</label>
+                    <input type="password" id="set-api-passphrase" placeholder="Enter Passphrase">
+                </div>
+                <div class="input-group">
+                    <label>Polygon Private Key (Wallet)</label>
+                    <input type="password" id="set-private-key" placeholder="Enter Private Key">
+                </div>
+                <div class="input-group">
+                    <label>Valor da Entrada (USD)</label>
+                    <input type="number" step="0.01" min="1.00" id="set-trade-size" placeholder="Ex: 10.00">
+                </div>
+                <div class="input-group">
+                    <label>Perfil de Estratégia</label>
+                    <select id="set-strategy-profile" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.5); color: #fff; font-family: inherit;">
+                        <option value="snowball">Bola de Neve (Minuto 13 - Segurança & Juros Compostos)</option>
+                        <option value="sniper">Sniper Antecipado (Minuto 8 - Lucro 60% a 100%)</option>
+                        <option value="reversal">Caçador de Reversão (Minuto 3 - Assimetrias Extremas)</option>
+                    </select>
+                </div>
+                <p class="warning-text"><i class="ph ph-warning"></i> Credentials are saved securely to your local Redis instance.</p>
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="button" class="btn btn-outline" onclick="closeSettings()" style="flex: 1; justify-content: center;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center;"><i class="ph ph-floppy-disk"></i> Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <div id="dashboard-container" class="dashboard-container hidden">
+        <!-- Header -->
+        <header class="glass-panel header">
+            <div class="logo-area">
+                <i class="ph ph-robot"></i>
+                <div class="logo-text">
+                    <h1>Polymarket BTC Bot</h1>
+                    <span class="version">v1.2.0-prod</span>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="status-badge" id="mode-badge">
+                    <div class="pulse-dot"></div>
+                    <span id="mode-text">CONNECTING...</span>
+                </div>
+                <button class="btn btn-icon" onclick="window.location.href='/tutorial'" title="Tutorial / Ajuda"><i class="ph ph-question"></i></button>
+                <button class="btn btn-icon" onclick="openSettings()" title="Settings"><i class="ph ph-gear"></i></button>
+                <button class="btn btn-icon" onclick="logout()" title="Logout"><i class="ph ph-sign-out"></i></button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="dashboard-grid">
+            
+            <!-- Controls Panel -->
+            <section class="glass-panel controls-panel">
+                <h2><i class="ph ph-sliders"></i> Control Center</h2>
+                <div class="control-actions">
+                    <button class="btn btn-stop" id="btn-stop" onclick="setMode('stopped')">
+                        <i class="ph ph-stop-circle"></i> STOP GERAL
+                    </button>
+                    <button class="btn btn-outline" id="btn-sim" onclick="setMode('sim')">
+                        <i class="ph ph-flask"></i> SIMULATION
+                    </button>
+                    <button class="btn btn-danger" id="btn-live" onclick="setMode('live')">
+                        <i class="ph ph-currency-btc"></i> LIVE TRADING
+                    </button>
+                </div>
+                <div class="warning-box">
+                    <i class="ph ph-info"></i>
+                    <p>Always STOP the bot before switching between Simulation and Live Trading to ensure clean state.</p>
+                </div>
+            </section>
+
+            <!-- Metrics Overview -->
+            <section class="glass-panel metrics-panel">
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="ph ph-chart-line-up"></i></div>
+                    <div class="metric-data">
+                        <h3>Total P&L</h3>
+                        <p class="metric-value positive" id="val-pnl">$0.00</p>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="ph ph-target"></i></div>
+                    <div class="metric-data">
+                        <h3>Win Rate</h3>
+                        <p class="metric-value" id="val-winrate">0%</p>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="ph ph-swap"></i></div>
+                    <div class="metric-data">
+                        <h3>Total Trades</h3>
+                        <p class="metric-value" id="val-total-trades">0</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Chart Panel -->
+            <section class="glass-panel chart-panel">
+                <div class="panel-header">
+                    <h2><i class="ph ph-trend-up"></i> Equity Curve</h2>
+                </div>
+                <div class="chart-container">
+                    <canvas id="pnlChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Live Logs Terminal -->
+            <section class="glass-panel terminal-panel">
+                <div class="panel-header terminal-header">
+                    <h2><i class="ph ph-terminal"></i> Live Activity Logs</h2>
+                    <div class="terminal-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+                <div class="terminal-container" id="terminal-logs">
+                    <!-- Logs will be streamed here via WebSockets -->
+                    <div class="log-line"><span class="log-info">[INFO]</span> Waiting for bot logs...</div>
+                </div>
+            </section>
+
+            <!-- Recent Trades -->
+            <section class="glass-panel trades-panel">
+                <div class="panel-header">
+                    <h2><i class="ph ph-clock-counter-clockwise"></i> Recent Trades</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Direction</th>
+                                <th>Size</th>
+                                <th>Price</th>
+                                <th>Confidence</th>
+                                <th>Outcome</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trades-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

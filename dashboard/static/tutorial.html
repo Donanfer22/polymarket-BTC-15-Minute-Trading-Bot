@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial | Polymarket Bot</title>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .tutorial-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+        
+        .tutorial-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 1rem;
+        }
+
+        .tutorial-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #fff, #a0aec0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .topic-card {
+            background: rgba(25, 25, 35, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .topic-card:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.1);
+        }
+
+        .topic-card h2 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #818cf8;
+            margin-top: 0;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .topic-card p, .topic-card li {
+            color: #cbd5e1;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
+        .topic-card ul, .topic-card ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .topic-card li {
+            margin-bottom: 0.5rem;
+        }
+
+        .highlight-box {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid #ef4444;
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1rem 0;
+        }
+
+        .highlight-box.info {
+            background: rgba(56, 189, 248, 0.1);
+            border-left-color: #38bdf8;
+        }
+
+        code {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            color: #f87171;
+            font-family: monospace;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #94a3b8;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+            margin-bottom: 1rem;
+        }
+
+        .back-btn:hover {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="tutorial-container">
+        <a href="/" class="back-btn"><i class="ph ph-arrow-left"></i> Voltar ao Dashboard</a>
+        
+        <div class="tutorial-header glass-panel">
+            <i class="ph ph-book-open" style="font-size: 2.5rem; color: #818cf8;"></i>
+            <div>
+                <h1>Manual do Robô Polymarket</h1>
+                <p style="color: #94a3b8; margin: 0; margin-top: 0.5rem;">Guia passo a passo para configuração e operação</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <h2><i class="ph ph-robot"></i> 1. Como Utilizar as Funções do Robô</h2>
+            <p>O painel de controle permite alternar entre os modos de operação do robô em tempo real.</p>
+            <ul>
+                <li><strong>Botão Simulation (Laranja):</strong> O robô opera usando dinheiro falso (dinheiro de mentira) para validar a eficácia da estratégia sem risco. Os resultados vão para o quadro de P&L Simulado.</li>
+                <li><strong>Botão Live Trading (Roxo):</strong> O robô conecta diretamente na Polymarket com o seu dinheiro de verdade usando as chaves inseridas nas configurações. <span style="color: #f87171;">Atenção: Apenas ligue se tiver certeza da configuração!</span></li>
+                <li><strong>Botão STOP Geral (Vermelho):</strong> Freio de emergência. O robô para de tomar decisões imediatamente.</li>
+            </ul>
+            <div class="highlight-box info">
+                <strong>Perfis de Estratégia:</strong> Nas configurações (⚙️), você pode escolher a agressividade do robô.
+                <br>• <em>Bola de Neve:</em> Conservador. Entra faltando 2 min. Multiplica 20% do capital acumulado.
+                <br>• <em>Sniper Antecipado:</em> Retorno médio. Entra faltando 7 min. Retorno de 60%+.
+                <br>• <em>Reversão:</em> Agressivo. Entra faltando 12 min contra a manada. Retorno de até 500%.
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <h2><i class="ph ph-user-plus"></i> 2. Como Criar Conta na Polymarket</h2>
+            <p>Se você ainda não possui conta para depositar fundos:</p>
+            <ol>
+                <li>Acesse o site oficial: <a href="https://polymarket.com" target="_blank" style="color: #818cf8;">polymarket.com</a>.</li>
+                <li>Clique em <strong>Sign Up</strong> (ou Log In) no canto superior direito.</li>
+                <li>Você tem duas opções fáceales:
+                    <ul>
+                        <li><strong>Criar via Email (Proxy Wallet):</strong> A forma mais fácil. Digite o e-mail, e a Polymarket criará uma carteira automática vinculada a ele.</li>
+                        <li><strong>MetaMask / Rabby:</strong> Se você já usa carteiras Web3, clique em "Connect Wallet" para entrar diretamente pela sua extensão.</li>
+                    </ul>
+                </li>
+                <li>Deposite <strong>USDC na rede Polygon</strong> para ter saldo para operar.</li>
+            </ol>
+        </div>
+
+        <div class="topic-card">
+            <h2><i class="ph ph-key"></i> 3. Pegando suas Credenciais da API da Polymarket</h2>
+            <p>O robô precisa das suas chaves de API para comprar e vender no seu lugar (mesmo usando MetaMask ou Email).</p>
+            <ol>
+                <li>Acesse a Polymarket e faça o login.</li>
+                <li>Clique no ícone de <strong>Perfil</strong> (canto superior direito) e vá em <strong>Settings</strong>.</li>
+                <li>Role a página até encontrar a seção <strong>API Keys</strong> ou <strong>Developer Settings</strong>.</li>
+                <li>Clique em <strong>Create New Key</strong> (Criar nova chave).</li>
+                <li>A plataforma vai mostrar três códigos importantes que só aparecerão uma única vez na tela:
+                    <ul>
+                        <li><code>API_KEY</code></li>
+                        <li><code>API_SECRET</code></li>
+                        <li><code>API_PASSPHRASE</code></li>
+                    </ul>
+                </li>
+                <li>Copie os três e cole dentro da engrenagem (⚙️) no seu Dashboard.</li>
+            </ol>
+        </div>
+
+        <div class="topic-card">
+            <h2><i class="ph ph-wallet"></i> 4. Pegando a Chave Privada da Carteira (MetaMask)</h2>
+            <p>Para enviar ordens para o blockchain, o robô precisa assinar criptograficamente com a chave privada da sua carteira que contém o saldo.</p>
+            <ol>
+                <li>Abra a extensão da MetaMask no seu navegador.</li>
+                <li>Clique no ícone de três pontinhos (<code>⋮</code>) no canto superior direito.</li>
+                <li>Selecione <strong>Detalhes da Conta</strong> (Account Details).</li>
+                <li>Clique no botão <strong>Mostrar Chave Privada</strong> (Show Private Key).</li>
+                <li>Digite sua senha da MetaMask para revelar.</li>
+                <li>Copie a longa sequência hexadecimal gerada.</li>
+            </ol>
+            <div class="highlight-box">
+                <strong><i class="ph ph-warning-circle"></i> ATENÇÃO DE SEGURANÇA MÁXIMA</strong><br>
+                A sua Chave Privada (Private Key) é a dona do seu dinheiro. Quem possui essa chave pode transferir todos os seus fundos. <strong>NUNCA</strong> entregue isso a terceiros. 
+                Ao colocar essa chave na engrenagem do Dashboard, o nosso painel criptografa a chave localmente no banco de dados interno da sua própria máquina/VPS (Redis) e não envia para nenhuma nuvem ou banco de dados externo. O robô puxa ela direto do banco de dados fechado para assinar o trade na hora do ataque.
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

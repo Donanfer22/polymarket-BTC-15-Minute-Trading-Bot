@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Banco de Dados em Memória (Redis)
+  redis:
+    image: redis:alpine
+    container_name: polymarket-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # Robô Principal de Trading
+  bot:
+    build: .
+    container_name: polymarket-bot
+    command: python bot.py --live
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    restart: unless-stopped
+
+  # Painel Web e API (FastAPI)
+  dashboard:
+    build: .
+    container_name: polymarket-dashboard
+    command: python -m uvicorn dashboard.api:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    restart: unless-stopped
+
+volumes:
+  redis_data:
