@@ -409,28 +409,17 @@ tbody tr:hover {
 /* Responsive */
 @media (max-width: 1024px) {
     .dashboard-grid {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto;
+        display: flex;
+        flex-direction: column;
     }
     
-    .controls-panel {
-        grid-column: 1 / -1;
-    }
-    
-    .metrics-panel {
-        grid-column: 1 / -1;
-    }
-    
-    .chart-panel {
-        grid-column: 1 / -1;
-    }
-    
-    .terminal-panel {
-        grid-column: 1 / -1;
-    }
-    
+    .controls-panel, 
+    .metrics-panel, 
+    .chart-panel, 
+    .terminal-panel, 
     .trades-panel {
-        grid-column: 1 / -1;
+        width: 100%;
+        margin-bottom: 1rem;
     }
 }
 
@@ -623,4 +612,78 @@ tbody tr:hover {
 .log-warn { color: #f59e0b; font-weight: bold; }
 .log-error { color: #ef4444; font-weight: bold; }
 .log-success { color: #10b981; font-weight: bold; }
+
+/* ==========================================================================
+   Responsive / Mobile Styles
+   ========================================================================== */
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .terminal-panel {
+        grid-column: 1 / 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+    
+    .header-right {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .dashboard-container {
+        padding: 1rem;
+    }
+    
+    .control-actions {
+        flex-direction: column;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        width: 95%;
+        padding: 1.5rem;
+    }
+    
+    .tutorial-container {
+        padding: 1rem;
+    }
+    
+    .tutorial-header {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo-text h1 {
+        font-size: 1.2rem;
+    }
+    
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    .terminal-container {
+        font-size: 0.75rem;
+        height: 400px;
+    }
+    
+    .table th, .table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.8rem;
+    }
+}
 

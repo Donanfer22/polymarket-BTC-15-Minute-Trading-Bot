@@ -169,20 +169,6 @@
                 </div>
             </section>
 
-            <!-- Live Logs Terminal -->
-            <section class="glass-panel terminal-panel">
-                <div class="panel-header terminal-header">
-                    <h2><i class="ph ph-terminal"></i> Live Activity Logs</h2>
-                    <div class="terminal-dots">
-                        <span></span><span></span><span></span>
-                    </div>
-                </div>
-                <div class="terminal-container" id="terminal-logs">
-                    <!-- Logs will be streamed here via WebSockets -->
-                    <div class="log-line"><span class="log-info">[INFO]</span> Waiting for bot logs...</div>
-                </div>
-            </section>
-
             <!-- Recent Trades -->
             <section class="glass-panel trades-panel">
                 <div class="panel-header">
@@ -204,6 +190,20 @@
                             <!-- Populated by JS -->
                         </tbody>
                     </table>
+                </div>
+            </section>
+
+            <!-- Live Logs Terminal -->
+            <section class="glass-panel terminal-panel">
+                <div class="panel-header terminal-header">
+                    <h2><i class="ph ph-terminal"></i> Live Activity Logs</h2>
+                    <div class="terminal-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+                <div class="terminal-container" id="terminal-logs">
+                    <!-- Logs will be streamed here via WebSockets -->
+                    <div class="log-line"><span class="log-info">[INFO]</span> Waiting for bot logs...</div>
                 </div>
             </section>
         </main>
