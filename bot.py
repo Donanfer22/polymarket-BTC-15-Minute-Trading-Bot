@@ -1626,12 +1626,6 @@ def main():
 
     args = parser.parse_args()
     enable_grafana = not args.no_grafana
-    try:
-        bot = PolymarketBot(live_mode=args.live, test_mode=args.test_mode)
-    except Exception as e:
-        import traceback
-        logger.error(f"FATAL ERROR IN INIT: {e}\n{traceback.format_exc()}")
-        time.sleep(600)
     test_mode = args.test_mode
 
     # --test-mode ALWAYS forces simulation even if --live is also passed
@@ -1655,7 +1649,6 @@ def main():
     except Exception as e:
         import traceback
         logger.error(f"FATAL ERROR IN RUN: {e}\n{traceback.format_exc()}")
-        import time
         time.sleep(600)
 
 
