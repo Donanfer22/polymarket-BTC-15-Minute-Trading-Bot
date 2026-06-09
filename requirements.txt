@@ -10,3 +10,5 @@ python-dotenv
 grafana-client
 loguru
 pandas
+jinja2
+python-multipart
