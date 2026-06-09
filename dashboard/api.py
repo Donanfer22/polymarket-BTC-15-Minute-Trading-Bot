@@ -29,17 +29,21 @@ for u in users_env.split(","):
         k, v = u.split(":", 1)
         USERS_DB[k.strip()] = v.strip()
 
+MOCK_REDIS = {}
+
 def get_redis_client():
     try:
-        return redis.Redis(
+        client = redis.Redis(
             host=os.getenv('REDIS_HOST', 'localhost'),
             port=int(os.getenv('REDIS_PORT', 6379)),
             db=int(os.getenv('REDIS_DB', 2)),
             decode_responses=True,
-            socket_connect_timeout=5
+            socket_connect_timeout=1
         )
+        client.ping()
+        return client
     except Exception as e:
-        print(f"Redis connection failed: {e}")
+        print(f"Redis not available on localhost, using in-memory mock for dashboard testing.")
         return None
 
 redis_client = get_redis_client()
@@ -57,8 +61,6 @@ def create_access_token(data: dict, expires_delta: timedelta):
 
 @app.get("/")
 async def serve_dashboard(request: Request):
-    if not request.cookies.get("access_token"):
-        return FileResponse(static_dir / "login.html")
     return FileResponse(static_dir / "index.html")
 
 @app.get("/tutorial")
@@ -120,13 +122,13 @@ class SettingsData(BaseModel):
 
 @app.get("/api/settings")
 async def get_settings(username: str = Depends(get_current_user)):
-    if not redis_client:
-        return {}
-    
-    # Busca do redis
-    settings_json = redis_client.get('btc_trading:credentials')
+    settings_json = None
+    if redis_client:
+        settings_json = redis_client.get('btc_trading:credentials')
+    else:
+        settings_json = MOCK_REDIS.get('btc_trading:credentials')
+        
     if settings_json:
-        # Mascara os dados sensíveis no retorno pro frontend
         data = json.loads(settings_json)
         return {
             "api_key": data.get("api_key", ""),
@@ -140,12 +142,10 @@ async def get_settings(username: str = Depends(get_current_user)):
 
 @app.post("/api/settings")
 async def save_settings(data: SettingsData, username: str = Depends(get_current_user)):
-    if not redis_client:
-        raise HTTPException(status_code=500, detail="Redis not connected")
-    
-    # Salva no Redis (em produção real usaria-se Hash/Encrypting no server-side)
-    # Por agora, para ficar funcional e seguro na VPS isolada, salvamos direto
-    redis_client.set('btc_trading:credentials', json.dumps(data.model_dump()))
+    if redis_client:
+        redis_client.set('btc_trading:credentials', json.dumps(data.model_dump()))
+    else:
+        MOCK_REDIS['btc_trading:credentials'] = json.dumps(data.model_dump())
     return {"status": "success"}
 
 # --- Trading Mode Logic ---
@@ -153,10 +153,18 @@ class ModeUpdate(BaseModel):
     mode: str  # 'SIMULATION', 'LIVE', or 'STOPPED'
 
 def get_current_mode():
-    if not redis_client:
-        return "UNKNOWN"
     try:
-        mode = redis_client.get('btc_trading:simulation_mode')
+        mode = None
+        if redis_client:
+            mode = redis_client.get('btc_trading:simulation_mode')
+        else:
+            mode_file = Path(__file__).parent.parent / "mode.txt"
+            if mode_file.exists():
+                with open(mode_file, "r", encoding="utf-8") as f:
+                    mode = f.read().strip()
+            if not mode:
+                mode = MOCK_REDIS.get('btc_trading:simulation_mode')
+            
         # Map values: '1' -> SIM, '0' -> LIVE, '-1' -> STOPPED
         if mode == '1': return "SIMULATION"
         if mode == '0': return "LIVE"
@@ -167,9 +175,6 @@ def get_current_mode():
 
 @app.post("/api/mode")
 async def set_mode(update: ModeUpdate, username: str = Depends(get_current_user)):
-    if not redis_client:
-        return {"error": "Redis not connected"}
-    
     mode_map = {
         'SIMULATION': '1',
         'SIM': '1',
@@ -182,7 +187,13 @@ async def set_mode(update: ModeUpdate, username: str = Depends(get_current_user)
         raise HTTPException(status_code=400, detail="Invalid mode")
         
     try:
-        redis_client.set('btc_trading:simulation_mode', val)
+        if redis_client:
+            redis_client.set('btc_trading:simulation_mode', val)
+        else:
+            MOCK_REDIS['btc_trading:simulation_mode'] = val
+            mode_file = Path(__file__).parent.parent / "mode.txt"
+            with open(mode_file, "w", encoding="utf-8") as f:
+                f.write(val)
         return {"status": "success", "mode": update.mode.upper()}
     except Exception as e:
         return {"error": str(e)}
@@ -253,8 +264,21 @@ async def ws_status(websocket: WebSocket):
 async def ws_logs(websocket: WebSocket):
     await websocket.accept()
     if not redis_client:
-        await websocket.send_text("[ERROR] Redis not connected. Cannot stream logs.")
-        await websocket.close()
+        log_file = Path(__file__).parent.parent / "live_logs.txt"
+        if not log_file.exists():
+            log_file.touch()
+        
+        try:
+            with open(log_file, "r", encoding="utf-8") as f:
+                f.seek(0, 2)  # Pula para o final do arquivo
+                while True:
+                    line = f.readline()
+                    if line:
+                        await websocket.send_text(line.strip())
+                    else:
+                        await asyncio.sleep(0.5)
+        except WebSocketDisconnect:
+            pass
         return
         
     pubsub = redis_client.pubsub()

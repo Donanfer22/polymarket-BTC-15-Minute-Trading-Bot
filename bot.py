@@ -137,7 +137,7 @@ class IntegratedBTCStrategy(Strategy):
     - Correct timing for market switching
     """
 
-    def __init__(self, redis_client=None, enable_grafana=True, test_mode=False):
+    def __init__(self, redis_client=None, enable_grafana=True, test_mode=False, simulation=False):
         super().__init__()
         
         self.loop = asyncio.get_event_loop()
@@ -148,7 +148,7 @@ class IntegratedBTCStrategy(Strategy):
         # Nautilus
         self.instrument_id = None
         self.redis_client = redis_client
-        self.current_simulation_mode = False
+        self.current_simulation_mode = simulation
 
         # Store ALL BTC instruments
         self.all_btc_instruments: List[Dict] = []
@@ -293,29 +293,42 @@ class IntegratedBTCStrategy(Strategy):
     # ------------------------------------------------------------------
 
     async def check_simulation_mode(self) -> bool:
-        """Check Redis for current simulation mode."""
-        if not self.redis_client:
-            return getattr(self, 'current_simulation_mode', True)
-        try:
-            sim_mode = self.redis_client.get('btc_trading:simulation_mode')
-            if sim_mode is not None:
-                if sim_mode == '-1':
-                    if not getattr(self, 'redis_paused', False):
-                        logger.warning("Bot is STOPPED via Redis")
-                    self.redis_paused = True
-                    return getattr(self, 'current_simulation_mode', True)
+        """Check Redis or fallback file for current simulation mode."""
+        sim_mode = None
+        
+        if self.redis_client:
+            try:
+                sim_mode = self.redis_client.get('btc_trading:simulation_mode')
+            except Exception as e:
+                logger.warning(f"Failed to check Redis simulation mode: {e}")
+        else:
+            # Fallback to mode.txt for localhost testing
+            try:
+                import os
+                mode_file = os.path.join(os.path.dirname(__file__), "mode.txt")
+                if os.path.exists(mode_file):
+                    with open(mode_file, "r", encoding="utf-8") as f:
+                        sim_mode = f.read().strip()
+            except Exception as e:
+                pass
                 
-                self.redis_paused = False
-                redis_simulation = sim_mode == '1'
-                if getattr(self, 'current_simulation_mode', None) != redis_simulation:
-                    self.current_simulation_mode = redis_simulation
-                    mode_text = "SIMULATION" if redis_simulation else "LIVE TRADING"
-                    logger.warning(f"Trading mode changed to: {mode_text}")
-                    if not redis_simulation:
-                        logger.warning("LIVE TRADING ACTIVE - Real money at risk!")
-                return redis_simulation
-        except Exception as e:
-            logger.warning(f"Failed to check Redis simulation mode: {e}")
+        if sim_mode is not None:
+            if sim_mode == '-1':
+                if not getattr(self, 'redis_paused', False):
+                    logger.warning("Bot is STOPPED via Dashboard")
+                self.redis_paused = True
+                return getattr(self, 'current_simulation_mode', True)
+            
+            self.redis_paused = False
+            redis_simulation = (sim_mode == '1')
+            if getattr(self, 'current_simulation_mode', None) != redis_simulation:
+                self.current_simulation_mode = redis_simulation
+                mode_text = "SIMULATION" if redis_simulation else "LIVE TRADING"
+                logger.warning(f"Trading mode changed to: {mode_text}")
+                if not redis_simulation:
+                    logger.warning("LIVE TRADING ACTIVE - Real money at risk!")
+            return redis_simulation
+            
         return getattr(self, 'current_simulation_mode', True)
 
     # ------------------------------------------------------------------
@@ -1432,7 +1445,16 @@ class IntegratedBTCStrategy(Strategy):
 # ---------------------------------------------------------------------------
 
 def setup_redis_logging(redis_client):
-    """Broadcast loguru logs to Redis PubSub for the dashboard terminal."""
+    """Broadcast loguru logs to Redis PubSub and a local file for the dashboard terminal."""
+    log_file = Path(__file__).parent / "live_logs.txt"
+    def file_sink(message):
+        try:
+            with open(log_file, "a", encoding="utf-8") as f:
+                f.write(str(message).strip() + "\n")
+        except:
+            pass
+    logger.add(file_sink, format="{message}")
+    
     if not redis_client: return
     def redis_sink(message):
         try:
@@ -1568,6 +1590,7 @@ def run_integrated_bot(simulation: bool = False, enable_grafana: bool = True, te
         redis_client=redis_client,
         enable_grafana=enable_grafana,
         test_mode=test_mode,
+        simulation=simulation,
     )
 
     print("\nBuilding Nautilus node...")

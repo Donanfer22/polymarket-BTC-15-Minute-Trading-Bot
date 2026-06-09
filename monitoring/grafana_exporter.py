@@ -176,7 +176,7 @@ class GrafanaMetricsExporter:
     
     def __init__(
         self,
-        port: int = 8000,
+        port: int = 8001,
         update_interval: int = 5,  # seconds
     ):
         """
