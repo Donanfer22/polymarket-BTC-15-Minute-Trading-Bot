@@ -1,4 +1,4 @@
-FROM python:3.11
+FROM python:3.13
 
 # Set timezone and env vars
 ENV PYTHONDONTWRITEBYTECODE=1
