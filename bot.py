@@ -1018,7 +1018,12 @@ class IntegratedBTCStrategy(Strategy):
             # Calculate 20% of compounded bankroll
             # Bankroll starts at 100.0, we add PNL of all past trades
             base_bankroll = 100.0
-            total_pnl = sum(float(pt.pnl) for pt in self.paper_trades if pt.outcome != "PENDING")
+            total_pnl = 0.0
+            for pt in self.paper_trades:
+                if pt.outcome == 'WIN':
+                    total_pnl += pt.size_usd * 0.20
+                elif pt.outcome == 'LOSS':
+                    total_pnl -= pt.size_usd * 0.30
             current_bankroll = base_bankroll + total_pnl
             if current_bankroll < 10.0: current_bankroll = 10.0 # floor
             dynamic_size = current_bankroll * 0.20
