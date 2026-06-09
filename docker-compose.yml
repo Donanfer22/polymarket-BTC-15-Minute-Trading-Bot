@@ -4,9 +4,8 @@ services:
   # Banco de Dados em Memória (Redis)
   redis:
     image: redis:alpine
-    container_name: polymarket-redis
-    ports:
-      - "6379:6379"
+    # NOTA PARA COOLIFY: container_name removido para permitir Zero-Downtime Deployments (Coolify gerencia os nomes automaticamente)
+    # NOTA DE SEGURANÇA: ports "6379:6379" removido para que o banco não fique exposto para a internet da VPS
     volumes:
       - redis_data:/data
     restart: unless-stopped
@@ -15,7 +14,6 @@ services:
   # Robô Principal de Trading
   bot:
     build: .
-    container_name: polymarket-bot
     command: python bot.py --live
     depends_on:
       - redis
@@ -29,10 +27,11 @@ services:
   # Painel Web e API (FastAPI)
   dashboard:
     build: .
-    container_name: polymarket-dashboard
     command: python -m uvicorn dashboard.api:app --host 0.0.0.0 --port 8000
-    ports:
-      - "8000:8000"
+    # NOTA PARA COOLIFY: Usamos 'expose' ao invés de 'ports: 8000:8000' para evitar conflito de portas no host da VPS. 
+    # O proxy reverso do Coolify vai ler essa porta exposta internamente e rotear o seu domínio para ela.
+    expose:
+      - "8000"
     depends_on:
       - redis
     env_file:
