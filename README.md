@@ -83,6 +83,7 @@ O projeto já contém um arquivo `docker-compose.yml` totalmente arquitetado par
 2. Conecte seu repositório do Github.
 3. Defina os **Domínios** na aba "Configuration" (O Coolify fará o roteamento automático para a porta interna `8000` que deixamos exposta através da instrução `expose` no docker-compose).
 4. Preencha a aba **Environment Variables** (Copie os dados do seu arquivo `.env.example`).
+   - Lembre-se de adicionar a variável `USERS=admin:sua_senha_segura` para você conseguir fazer login no painel!
 5. **Atenção à Segurança e Persistência**: A arquitetura provisiona 3 serviços rodando em containers isolados:
    - `redis` (Banco de dados de controle interno - Inacessível por fora para evitar ataques).
    - `bot` (O motor de execução de alta frequência).
