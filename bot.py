@@ -140,7 +140,11 @@ class IntegratedBTCStrategy(Strategy):
     def __init__(self, redis_client=None, enable_grafana=True, test_mode=False, simulation=False):
         super().__init__()
         
-        self.loop = asyncio.get_event_loop()
+        try:
+            self.loop = asyncio.get_running_loop()
+        except RuntimeError:
+            self.loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(self.loop)
 
         self.bot_start_time = datetime.now(timezone.utc)
         self.restart_after_minutes = 90
