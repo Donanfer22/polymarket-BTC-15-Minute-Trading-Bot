@@ -75,15 +75,20 @@ python bot.py --test-mode
 
 Controle tudo pelo painel no seu navegador!
 
-## 🐳 Deploy na Nuvem (Easypanel / VPS)
+## 🐳 Deploy na Nuvem (Coolify)
 
-O projeto já contém um arquivo `docker-compose.yml` arquitetado para produção.
-1. Conecte o seu repositório no Easypanel (ou sua VPS com Docker).
-2. O Docker Compose iniciará automaticamente três containers:
-   - `redis` (Banco de dados em memória)
-   - `api` (Dashboard exposto na porta 8000)
-   - `bot` (Processo interno de execução)
-3. Não é necessário mais nenhuma configuração complexa, todas as portas e redes internas estão pré-configuradas.
+O projeto já contém um arquivo `docker-compose.yml` totalmente arquitetado para produção e **Zero-Downtime Deployments** através do [Coolify](https://coolify.io).
+
+1. Crie um novo projeto "Docker Compose" no seu painel do Coolify.
+2. Conecte seu repositório do Github.
+3. Defina os **Domínios** na aba "Configuration" (O Coolify fará o roteamento automático para a porta interna `8000` que deixamos exposta através da instrução `expose` no docker-compose).
+4. Preencha a aba **Environment Variables** (Copie os dados do seu arquivo `.env.example`).
+5. **Atenção à Segurança e Persistência**: A arquitetura provisiona 3 serviços rodando em containers isolados:
+   - `redis` (Banco de dados de controle interno - Inacessível por fora para evitar ataques).
+   - `bot` (O motor de execução de alta frequência).
+   - `dashboard` (A API do seu painel e os WebSockets seguros).
+   *(Nota: O histórico de trades simulados é salvo em uma pasta `/data` que utiliza Docker Volumes (bot_data) para que ambos os containers consigam ler o histórico perfeitamente e os dados sobrevivam a reinicializações).*
+6. Clique em **Deploy** e o seu sistema de alta frequência institucional estará operando no mundo inteiro em 2 minutos.
 
 ## ⚠️ Aviso de Risco
 Este software foi desenvolvido com fins educacionais e de pesquisa algorítmica. O mercado de criptomoedas e mercados de previsão (Prediction Markets) carregam altíssimo risco financeiro. Os desenvolvedores não se responsabilizam por quaisquer perdas financeiras resultantes do uso deste bot. Sempre teste exaustivamente no modo `SIMULATION` antes de operar com fundos reais.

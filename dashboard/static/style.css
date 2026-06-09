@@ -350,15 +350,19 @@ h2 i {
 /* Tables */
 .table-container {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
 }
 
 table {
     width: 100%;
+    min-width: 600px; /* Force scroll on mobile */
     border-collapse: separate;
     border-spacing: 0;
 }
 
 th {
+    white-space: nowrap;
     text-align: left;
     padding: 1rem;
     color: var(--text-secondary);

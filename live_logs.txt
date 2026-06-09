@@ -1,0 +1,956 @@
+================================================================================
+LOADING BTC 15-MIN MARKETS BY SLUG
+Interval start: 1781008200 | Count: 98
+First: btc-updown-15m-1781007300  Last: btc-updown-15m-1781094600
+================================================================================
+Initialized Spike Detector (FIXED): deviation_threshold=5.0%, velocity_threshold=3.0%, lookback=20
+Initialized Sentiment Processor: fear<25, greed>75
+Initialized Price Divergence Processor (FIXED): momentum_thresh=0.3%, extreme_fade=68%/32%
+Initialized Order Book Imbalance Processor: imbalance_threshold=30%, wall_threshold=20%, min_book_volume=$50
+Initialized Tick Velocity Processor: 60s_threshold=1.5%, 30s_threshold=1.0%
+Initialized Deribit PCR Processor: bullish_pcr>1.2, bearish_pcr<0.7, max_dte=2d
+Initialized Signal Fusion Engine
+Weights: {'SpikeDetection': 0.4, 'PriceDivergence': 0.3, 'SentimentAnalysis': 0.2, 'default': 0.1}
+Set weight for OrderBookImbalance: 0.30
+Set weight for TickVelocity: 0.25
+Set weight for PriceDivergence: 0.18
+Set weight for SpikeDetection: 0.12
+Set weight for DeribitPCR: 0.10
+Set weight for SentimentAnalysis: 0.05
+Initialized Risk Engine: max_position=$1.0, max_exposure=$10.0
+Initialized Performance Tracker (capital=$1000.0)
+Initialized Learning Engine (learning_rate=0.1, min_trades=10)
+Initialized Execution Engine [DRY RUN]
+Prometheus metrics initialized
+Initialized Grafana Metrics Exporter (port 8000)
+================================================================================
+TEST MODE ACTIVE - Trading every minute!
+================================================================================
+================================================================================
+INTEGRATED BTC STRATEGY INITIALIZED - FIXED VERSION
+Phase 4: Signal processors ready
+Phase 5: Risk engine ready
+Phase 6: Performance tracking ready
+Phase 7: Learning engine ready
+$1 per trade maximum
+================================================================================
+Nautilus node built successfully
+================================================================================
+INTEGRATED BTC STRATEGY STARTED - FIXED VERSION
+================================================================================
+Loading ALL BTC instruments from 194 total...
+================================================================================
+FOUND 96 BTC 15-MIN MARKETS:
+[0] btc-updown-15m-1781008200: ACTIVE (starts at 12:30:00, ends at 12:45:00)
+[1] btc-updown-15m-1781009100: FUTURE (starts at 12:45:00, ends at 13:00:00)
+[2] btc-updown-15m-1781010000: FUTURE (starts at 13:00:00, ends at 13:15:00)
+[3] btc-updown-15m-1781010900: FUTURE (starts at 13:15:00, ends at 13:30:00)
+[4] btc-updown-15m-1781011800: FUTURE (starts at 13:30:00, ends at 13:45:00)
+[5] btc-updown-15m-1781012700: FUTURE (starts at 13:45:00, ends at 14:00:00)
+[6] btc-updown-15m-1781013600: FUTURE (starts at 14:00:00, ends at 14:15:00)
+[7] btc-updown-15m-1781014500: FUTURE (starts at 14:15:00, ends at 14:30:00)
+[8] btc-updown-15m-1781015400: FUTURE (starts at 14:30:00, ends at 14:45:00)
+[9] btc-updown-15m-1781016300: FUTURE (starts at 14:45:00, ends at 15:00:00)
+[10] btc-updown-15m-1781017200: FUTURE (starts at 15:00:00, ends at 15:15:00)
+[11] btc-updown-15m-1781018100: FUTURE (starts at 15:15:00, ends at 15:30:00)
+[12] btc-updown-15m-1781019000: FUTURE (starts at 15:30:00, ends at 15:45:00)
+[13] btc-updown-15m-1781019900: FUTURE (starts at 15:45:00, ends at 16:00:00)
+[14] btc-updown-15m-1781020800: FUTURE (starts at 16:00:00, ends at 16:15:00)
+[15] btc-updown-15m-1781021700: FUTURE (starts at 16:15:00, ends at 16:30:00)
+[16] btc-updown-15m-1781022600: FUTURE (starts at 16:30:00, ends at 16:45:00)
+[17] btc-updown-15m-1781023500: FUTURE (starts at 16:45:00, ends at 17:00:00)
+[18] btc-updown-15m-1781024400: FUTURE (starts at 17:00:00, ends at 17:15:00)
+[19] btc-updown-15m-1781025300: FUTURE (starts at 17:15:00, ends at 17:30:00)
+[20] btc-updown-15m-1781026200: FUTURE (starts at 17:30:00, ends at 17:45:00)
+[21] btc-updown-15m-1781027100: FUTURE (starts at 17:45:00, ends at 18:00:00)
+[22] btc-updown-15m-1781028000: FUTURE (starts at 18:00:00, ends at 18:15:00)
+[23] btc-updown-15m-1781028900: FUTURE (starts at 18:15:00, ends at 18:30:00)
+[24] btc-updown-15m-1781029800: FUTURE (starts at 18:30:00, ends at 18:45:00)
+[25] btc-updown-15m-1781030700: FUTURE (starts at 18:45:00, ends at 19:00:00)
+[26] btc-updown-15m-1781031600: FUTURE (starts at 19:00:00, ends at 19:15:00)
+[27] btc-updown-15m-1781032500: FUTURE (starts at 19:15:00, ends at 19:30:00)
+[28] btc-updown-15m-1781033400: FUTURE (starts at 19:30:00, ends at 19:45:00)
+[29] btc-updown-15m-1781034300: FUTURE (starts at 19:45:00, ends at 20:00:00)
+[30] btc-updown-15m-1781035200: FUTURE (starts at 20:00:00, ends at 20:15:00)
+[31] btc-updown-15m-1781036100: FUTURE (starts at 20:15:00, ends at 20:30:00)
+[32] btc-updown-15m-1781037000: FUTURE (starts at 20:30:00, ends at 20:45:00)
+[33] btc-updown-15m-1781037900: FUTURE (starts at 20:45:00, ends at 21:00:00)
+[34] btc-updown-15m-1781038800: FUTURE (starts at 21:00:00, ends at 21:15:00)
+[35] btc-updown-15m-1781039700: FUTURE (starts at 21:15:00, ends at 21:30:00)
+[36] btc-updown-15m-1781040600: FUTURE (starts at 21:30:00, ends at 21:45:00)
+[37] btc-updown-15m-1781041500: FUTURE (starts at 21:45:00, ends at 22:00:00)
+[38] btc-updown-15m-1781042400: FUTURE (starts at 22:00:00, ends at 22:15:00)
+[39] btc-updown-15m-1781043300: FUTURE (starts at 22:15:00, ends at 22:30:00)
+[40] btc-updown-15m-1781044200: FUTURE (starts at 22:30:00, ends at 22:45:00)
+[41] btc-updown-15m-1781045100: FUTURE (starts at 22:45:00, ends at 23:00:00)
+[42] btc-updown-15m-1781046000: FUTURE (starts at 23:00:00, ends at 23:15:00)
+[43] btc-updown-15m-1781046900: FUTURE (starts at 23:15:00, ends at 23:30:00)
+[44] btc-updown-15m-1781047800: FUTURE (starts at 23:30:00, ends at 23:45:00)
+[45] btc-updown-15m-1781048700: FUTURE (starts at 23:45:00, ends at 00:00:00)
+[46] btc-updown-15m-1781049600: FUTURE (starts at 00:00:00, ends at 00:15:00)
+[47] btc-updown-15m-1781050500: FUTURE (starts at 00:15:00, ends at 00:30:00)
+[48] btc-updown-15m-1781051400: FUTURE (starts at 00:30:00, ends at 00:45:00)
+[49] btc-updown-15m-1781052300: FUTURE (starts at 00:45:00, ends at 01:00:00)
+[50] btc-updown-15m-1781053200: FUTURE (starts at 01:00:00, ends at 01:15:00)
+[51] btc-updown-15m-1781054100: FUTURE (starts at 01:15:00, ends at 01:30:00)
+[52] btc-updown-15m-1781055000: FUTURE (starts at 01:30:00, ends at 01:45:00)
+[53] btc-updown-15m-1781055900: FUTURE (starts at 01:45:00, ends at 02:00:00)
+[54] btc-updown-15m-1781056800: FUTURE (starts at 02:00:00, ends at 02:15:00)
+[55] btc-updown-15m-1781057700: FUTURE (starts at 02:15:00, ends at 02:30:00)
+[56] btc-updown-15m-1781058600: FUTURE (starts at 02:30:00, ends at 02:45:00)
+[57] btc-updown-15m-1781059500: FUTURE (starts at 02:45:00, ends at 03:00:00)
+[58] btc-updown-15m-1781060400: FUTURE (starts at 03:00:00, ends at 03:15:00)
+[59] btc-updown-15m-1781061300: FUTURE (starts at 03:15:00, ends at 03:30:00)
+[60] btc-updown-15m-1781062200: FUTURE (starts at 03:30:00, ends at 03:45:00)
+[61] btc-updown-15m-1781063100: FUTURE (starts at 03:45:00, ends at 04:00:00)
+[62] btc-updown-15m-1781064000: FUTURE (starts at 04:00:00, ends at 04:15:00)
+[63] btc-updown-15m-1781064900: FUTURE (starts at 04:15:00, ends at 04:30:00)
+[64] btc-updown-15m-1781065800: FUTURE (starts at 04:30:00, ends at 04:45:00)
+[65] btc-updown-15m-1781066700: FUTURE (starts at 04:45:00, ends at 05:00:00)
+[66] btc-updown-15m-1781067600: FUTURE (starts at 05:00:00, ends at 05:15:00)
+[67] btc-updown-15m-1781068500: FUTURE (starts at 05:15:00, ends at 05:30:00)
+[68] btc-updown-15m-1781069400: FUTURE (starts at 05:30:00, ends at 05:45:00)
+[69] btc-updown-15m-1781070300: FUTURE (starts at 05:45:00, ends at 06:00:00)
+[70] btc-updown-15m-1781071200: FUTURE (starts at 06:00:00, ends at 06:15:00)
+[71] btc-updown-15m-1781072100: FUTURE (starts at 06:15:00, ends at 06:30:00)
+[72] btc-updown-15m-1781073000: FUTURE (starts at 06:30:00, ends at 06:45:00)
+[73] btc-updown-15m-1781073900: FUTURE (starts at 06:45:00, ends at 07:00:00)
+[74] btc-updown-15m-1781074800: FUTURE (starts at 07:00:00, ends at 07:15:00)
+[75] btc-updown-15m-1781075700: FUTURE (starts at 07:15:00, ends at 07:30:00)
+[76] btc-updown-15m-1781076600: FUTURE (starts at 07:30:00, ends at 07:45:00)
+[77] btc-updown-15m-1781077500: FUTURE (starts at 07:45:00, ends at 08:00:00)
+[78] btc-updown-15m-1781078400: FUTURE (starts at 08:00:00, ends at 08:15:00)
+[79] btc-updown-15m-1781079300: FUTURE (starts at 08:15:00, ends at 08:30:00)
+[80] btc-updown-15m-1781080200: FUTURE (starts at 08:30:00, ends at 08:45:00)
+[81] btc-updown-15m-1781081100: FUTURE (starts at 08:45:00, ends at 09:00:00)
+[82] btc-updown-15m-1781082000: FUTURE (starts at 09:00:00, ends at 09:15:00)
+[83] btc-updown-15m-1781082900: FUTURE (starts at 09:15:00, ends at 09:30:00)
+[84] btc-updown-15m-1781083800: FUTURE (starts at 09:30:00, ends at 09:45:00)
+[85] btc-updown-15m-1781084700: FUTURE (starts at 09:45:00, ends at 10:00:00)
+[86] btc-updown-15m-1781085600: FUTURE (starts at 10:00:00, ends at 10:15:00)
+[87] btc-updown-15m-1781086500: FUTURE (starts at 10:15:00, ends at 10:30:00)
+[88] btc-updown-15m-1781087400: FUTURE (starts at 10:30:00, ends at 10:45:00)
+[89] btc-updown-15m-1781088300: FUTURE (starts at 10:45:00, ends at 11:00:00)
+[90] btc-updown-15m-1781089200: FUTURE (starts at 11:00:00, ends at 11:15:00)
+[91] btc-updown-15m-1781090100: FUTURE (starts at 11:15:00, ends at 11:30:00)
+[92] btc-updown-15m-1781091000: FUTURE (starts at 11:30:00, ends at 11:45:00)
+[93] btc-updown-15m-1781091900: FUTURE (starts at 11:45:00, ends at 12:00:00)
+[94] btc-updown-15m-1781092800: FUTURE (starts at 12:00:00, ends at 12:15:00)
+[95] btc-updown-15m-1781093700: FUTURE (starts at 12:15:00, ends at 12:30:00)
+================================================================================
+✓ CURRENT MARKET: btc-updown-15m-1781008200 (index 0)
+Next switch at: 12:45:00
+YES token: 1157906234056608…
+✓ SUBSCRIBED to current market
+✓ SUBSCRIBED to market: 0x7698451b458a6919ed261a1296e6abbb70f2af164875a9832b4d4cc7a97a2fc6-115790623405660854100657631923013814394379063680944920223143475663742549163891.POLYMARKET
+================================================================================
+Strategy active - will trade every 15 minutes
+Price history: 20 points
+✓ READY TO TRADE NOW!
+================================================================================
+✓ Metrics server started on port 8000
+Metrics available at: http://localhost:8000/metrics
+Health check: http://localhost:8000/health
+Supports: GET, POST, OPTIONS
+Metrics updated successfully
+Grafana metrics started on port 8000
+✓ Market STABLE immediately
+⏳ Status do Motor: Aguardando momento exato do ataque (Faltam 8m 43s)
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 29.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 28.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 27.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 26.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 25.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 24.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 22.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 21.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 22.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 24.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 25.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 24.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 22.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 24.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 25.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 23.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 22.0%
+⏳ Status do Motor: Aguardando momento exato do ataque (Faltam 7m 43s)
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 21.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 19.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 21.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 19.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 18.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 17.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 16.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 17.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 18.5%
+================================================================================
+LOADING BTC 15-MIN MARKETS BY SLUG
+Interval start: 1781008200 | Count: 98
+First: btc-updown-15m-1781007300  Last: btc-updown-15m-1781094600
+================================================================================
+Initialized Spike Detector (FIXED): deviation_threshold=5.0%, velocity_threshold=3.0%, lookback=20
+Initialized Sentiment Processor: fear<25, greed>75
+Initialized Price Divergence Processor (FIXED): momentum_thresh=0.3%, extreme_fade=68%/32%
+Initialized Order Book Imbalance Processor: imbalance_threshold=30%, wall_threshold=20%, min_book_volume=$50
+Initialized Tick Velocity Processor: 60s_threshold=1.5%, 30s_threshold=1.0%
+Initialized Deribit PCR Processor: bullish_pcr>1.2, bearish_pcr<0.7, max_dte=2d
+Initialized Signal Fusion Engine
+Weights: {'SpikeDetection': 0.4, 'PriceDivergence': 0.3, 'SentimentAnalysis': 0.2, 'default': 0.1}
+Set weight for OrderBookImbalance: 0.30
+Set weight for TickVelocity: 0.25
+Set weight for PriceDivergence: 0.18
+Set weight for SpikeDetection: 0.12
+Set weight for DeribitPCR: 0.10
+Set weight for SentimentAnalysis: 0.05
+Initialized Risk Engine: max_position=$1.0, max_exposure=$10.0
+Initialized Performance Tracker (capital=$1000.0)
+Initialized Learning Engine (learning_rate=0.1, min_trades=10)
+Initialized Execution Engine [DRY RUN]
+Prometheus metrics initialized
+Initialized Grafana Metrics Exporter (port 8000)
+================================================================================
+TEST MODE ACTIVE - Trading every minute!
+================================================================================
+================================================================================
+INTEGRATED BTC STRATEGY INITIALIZED - FIXED VERSION
+Phase 4: Signal processors ready
+Phase 5: Risk engine ready
+Phase 6: Performance tracking ready
+Phase 7: Learning engine ready
+$1 per trade maximum
+================================================================================
+Nautilus node built successfully
+================================================================================
+INTEGRATED BTC STRATEGY STARTED - FIXED VERSION
+================================================================================
+Loading ALL BTC instruments from 194 total...
+================================================================================
+FOUND 97 BTC 15-MIN MARKETS:
+[0] btc-updown-15m-1781008200: ACTIVE (starts at 12:30:00, ends at 12:45:00)
+[1] btc-updown-15m-1781009100: FUTURE (starts at 12:45:00, ends at 13:00:00)
+[2] btc-updown-15m-1781010000: FUTURE (starts at 13:00:00, ends at 13:15:00)
+[3] btc-updown-15m-1781010900: FUTURE (starts at 13:15:00, ends at 13:30:00)
+[4] btc-updown-15m-1781011800: FUTURE (starts at 13:30:00, ends at 13:45:00)
+[5] btc-updown-15m-1781012700: FUTURE (starts at 13:45:00, ends at 14:00:00)
+[6] btc-updown-15m-1781013600: FUTURE (starts at 14:00:00, ends at 14:15:00)
+[7] btc-updown-15m-1781014500: FUTURE (starts at 14:15:00, ends at 14:30:00)
+[8] btc-updown-15m-1781015400: FUTURE (starts at 14:30:00, ends at 14:45:00)
+[9] btc-updown-15m-1781016300: FUTURE (starts at 14:45:00, ends at 15:00:00)
+[10] btc-updown-15m-1781017200: FUTURE (starts at 15:00:00, ends at 15:15:00)
+[11] btc-updown-15m-1781018100: FUTURE (starts at 15:15:00, ends at 15:30:00)
+[12] btc-updown-15m-1781019000: FUTURE (starts at 15:30:00, ends at 15:45:00)
+[13] btc-updown-15m-1781019900: FUTURE (starts at 15:45:00, ends at 16:00:00)
+[14] btc-updown-15m-1781020800: FUTURE (starts at 16:00:00, ends at 16:15:00)
+[15] btc-updown-15m-1781021700: FUTURE (starts at 16:15:00, ends at 16:30:00)
+[16] btc-updown-15m-1781022600: FUTURE (starts at 16:30:00, ends at 16:45:00)
+[17] btc-updown-15m-1781023500: FUTURE (starts at 16:45:00, ends at 17:00:00)
+[18] btc-updown-15m-1781024400: FUTURE (starts at 17:00:00, ends at 17:15:00)
+[19] btc-updown-15m-1781025300: FUTURE (starts at 17:15:00, ends at 17:30:00)
+[20] btc-updown-15m-1781026200: FUTURE (starts at 17:30:00, ends at 17:45:00)
+[21] btc-updown-15m-1781027100: FUTURE (starts at 17:45:00, ends at 18:00:00)
+[22] btc-updown-15m-1781028000: FUTURE (starts at 18:00:00, ends at 18:15:00)
+[23] btc-updown-15m-1781028900: FUTURE (starts at 18:15:00, ends at 18:30:00)
+[24] btc-updown-15m-1781029800: FUTURE (starts at 18:30:00, ends at 18:45:00)
+[25] btc-updown-15m-1781030700: FUTURE (starts at 18:45:00, ends at 19:00:00)
+[26] btc-updown-15m-1781031600: FUTURE (starts at 19:00:00, ends at 19:15:00)
+[27] btc-updown-15m-1781032500: FUTURE (starts at 19:15:00, ends at 19:30:00)
+[28] btc-updown-15m-1781033400: FUTURE (starts at 19:30:00, ends at 19:45:00)
+[29] btc-updown-15m-1781034300: FUTURE (starts at 19:45:00, ends at 20:00:00)
+[30] btc-updown-15m-1781035200: FUTURE (starts at 20:00:00, ends at 20:15:00)
+[31] btc-updown-15m-1781036100: FUTURE (starts at 20:15:00, ends at 20:30:00)
+[32] btc-updown-15m-1781037000: FUTURE (starts at 20:30:00, ends at 20:45:00)
+[33] btc-updown-15m-1781037900: FUTURE (starts at 20:45:00, ends at 21:00:00)
+[34] btc-updown-15m-1781038800: FUTURE (starts at 21:00:00, ends at 21:15:00)
+[35] btc-updown-15m-1781039700: FUTURE (starts at 21:15:00, ends at 21:30:00)
+[36] btc-updown-15m-1781040600: FUTURE (starts at 21:30:00, ends at 21:45:00)
+[37] btc-updown-15m-1781041500: FUTURE (starts at 21:45:00, ends at 22:00:00)
+[38] btc-updown-15m-1781042400: FUTURE (starts at 22:00:00, ends at 22:15:00)
+[39] btc-updown-15m-1781043300: FUTURE (starts at 22:15:00, ends at 22:30:00)
+[40] btc-updown-15m-1781044200: FUTURE (starts at 22:30:00, ends at 22:45:00)
+[41] btc-updown-15m-1781045100: FUTURE (starts at 22:45:00, ends at 23:00:00)
+[42] btc-updown-15m-1781046000: FUTURE (starts at 23:00:00, ends at 23:15:00)
+[43] btc-updown-15m-1781046900: FUTURE (starts at 23:15:00, ends at 23:30:00)
+[44] btc-updown-15m-1781047800: FUTURE (starts at 23:30:00, ends at 23:45:00)
+[45] btc-updown-15m-1781048700: FUTURE (starts at 23:45:00, ends at 00:00:00)
+[46] btc-updown-15m-1781049600: FUTURE (starts at 00:00:00, ends at 00:15:00)
+[47] btc-updown-15m-1781050500: FUTURE (starts at 00:15:00, ends at 00:30:00)
+[48] btc-updown-15m-1781051400: FUTURE (starts at 00:30:00, ends at 00:45:00)
+[49] btc-updown-15m-1781052300: FUTURE (starts at 00:45:00, ends at 01:00:00)
+[50] btc-updown-15m-1781053200: FUTURE (starts at 01:00:00, ends at 01:15:00)
+[51] btc-updown-15m-1781054100: FUTURE (starts at 01:15:00, ends at 01:30:00)
+[52] btc-updown-15m-1781055000: FUTURE (starts at 01:30:00, ends at 01:45:00)
+[53] btc-updown-15m-1781055900: FUTURE (starts at 01:45:00, ends at 02:00:00)
+[54] btc-updown-15m-1781056800: FUTURE (starts at 02:00:00, ends at 02:15:00)
+[55] btc-updown-15m-1781057700: FUTURE (starts at 02:15:00, ends at 02:30:00)
+[56] btc-updown-15m-1781058600: FUTURE (starts at 02:30:00, ends at 02:45:00)
+[57] btc-updown-15m-1781059500: FUTURE (starts at 02:45:00, ends at 03:00:00)
+[58] btc-updown-15m-1781060400: FUTURE (starts at 03:00:00, ends at 03:15:00)
+[59] btc-updown-15m-1781061300: FUTURE (starts at 03:15:00, ends at 03:30:00)
+[60] btc-updown-15m-1781062200: FUTURE (starts at 03:30:00, ends at 03:45:00)
+[61] btc-updown-15m-1781063100: FUTURE (starts at 03:45:00, ends at 04:00:00)
+[62] btc-updown-15m-1781064000: FUTURE (starts at 04:00:00, ends at 04:15:00)
+[63] btc-updown-15m-1781064900: FUTURE (starts at 04:15:00, ends at 04:30:00)
+[64] btc-updown-15m-1781065800: FUTURE (starts at 04:30:00, ends at 04:45:00)
+[65] btc-updown-15m-1781066700: FUTURE (starts at 04:45:00, ends at 05:00:00)
+[66] btc-updown-15m-1781067600: FUTURE (starts at 05:00:00, ends at 05:15:00)
+[67] btc-updown-15m-1781068500: FUTURE (starts at 05:15:00, ends at 05:30:00)
+[68] btc-updown-15m-1781069400: FUTURE (starts at 05:30:00, ends at 05:45:00)
+[69] btc-updown-15m-1781070300: FUTURE (starts at 05:45:00, ends at 06:00:00)
+[70] btc-updown-15m-1781071200: FUTURE (starts at 06:00:00, ends at 06:15:00)
+[71] btc-updown-15m-1781072100: FUTURE (starts at 06:15:00, ends at 06:30:00)
+[72] btc-updown-15m-1781073000: FUTURE (starts at 06:30:00, ends at 06:45:00)
+[73] btc-updown-15m-1781073900: FUTURE (starts at 06:45:00, ends at 07:00:00)
+[74] btc-updown-15m-1781074800: FUTURE (starts at 07:00:00, ends at 07:15:00)
+[75] btc-updown-15m-1781075700: FUTURE (starts at 07:15:00, ends at 07:30:00)
+[76] btc-updown-15m-1781076600: FUTURE (starts at 07:30:00, ends at 07:45:00)
+[77] btc-updown-15m-1781077500: FUTURE (starts at 07:45:00, ends at 08:00:00)
+[78] btc-updown-15m-1781078400: FUTURE (starts at 08:00:00, ends at 08:15:00)
+[79] btc-updown-15m-1781079300: FUTURE (starts at 08:15:00, ends at 08:30:00)
+[80] btc-updown-15m-1781080200: FUTURE (starts at 08:30:00, ends at 08:45:00)
+[81] btc-updown-15m-1781081100: FUTURE (starts at 08:45:00, ends at 09:00:00)
+[82] btc-updown-15m-1781082000: FUTURE (starts at 09:00:00, ends at 09:15:00)
+[83] btc-updown-15m-1781082900: FUTURE (starts at 09:15:00, ends at 09:30:00)
+[84] btc-updown-15m-1781083800: FUTURE (starts at 09:30:00, ends at 09:45:00)
+[85] btc-updown-15m-1781084700: FUTURE (starts at 09:45:00, ends at 10:00:00)
+[86] btc-updown-15m-1781085600: FUTURE (starts at 10:00:00, ends at 10:15:00)
+[87] btc-updown-15m-1781086500: FUTURE (starts at 10:15:00, ends at 10:30:00)
+[88] btc-updown-15m-1781087400: FUTURE (starts at 10:30:00, ends at 10:45:00)
+[89] btc-updown-15m-1781088300: FUTURE (starts at 10:45:00, ends at 11:00:00)
+[90] btc-updown-15m-1781089200: FUTURE (starts at 11:00:00, ends at 11:15:00)
+[91] btc-updown-15m-1781090100: FUTURE (starts at 11:15:00, ends at 11:30:00)
+[92] btc-updown-15m-1781091000: FUTURE (starts at 11:30:00, ends at 11:45:00)
+[93] btc-updown-15m-1781091900: FUTURE (starts at 11:45:00, ends at 12:00:00)
+[94] btc-updown-15m-1781092800: FUTURE (starts at 12:00:00, ends at 12:15:00)
+[95] btc-updown-15m-1781093700: FUTURE (starts at 12:15:00, ends at 12:30:00)
+[96] btc-updown-15m-1781094600: FUTURE (starts at 12:30:00, ends at 12:45:00)
+================================================================================
+✓ CURRENT MARKET: btc-updown-15m-1781008200 (index 0)
+Next switch at: 12:45:00
+YES token: 1157906234056608…
+✓ SUBSCRIBED to current market
+✓ SUBSCRIBED to market: 0x7698451b458a6919ed261a1296e6abbb70f2af164875a9832b4d4cc7a97a2fc6-115790623405660854100657631923013814394379063680944920223143475663742549163891.POLYMARKET
+================================================================================
+Strategy active - will trade every 15 minutes
+Price history: 20 points
+✓ READY TO TRADE NOW!
+================================================================================
+✓ Metrics server started on port 8000
+Metrics available at: http://localhost:8000/metrics
+Health check: http://localhost:8000/health
+Supports: GET, POST, OPTIONS
+Metrics updated successfully
+Grafana metrics started on port 8000
+✓ Market STABLE immediately
+⏳ Status do Motor: Aguardando momento exato do ataque (Faltam 2m 50s)
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 23.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 24.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 23.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 22.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 21.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 19.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 18.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 17.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 16.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 18.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 20.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 21.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 22.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 24.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 25.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 26.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 27.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 26.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 25.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 24.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 22.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 21.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 20.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 19.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 18.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 16.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 15.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 14.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 16.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 18.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 16.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 18.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 19.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 20.0%
+⏳ Status do Motor: Aguardando momento exato do ataque (Faltam 1m 50s)
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 21.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 22.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 24.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 22.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 21.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 20.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 18.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 17.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 16.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 15.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 13.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 12.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 11.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 9.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 8.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 6.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 8.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 9.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 11.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 9.5%
+⏳ Status do Motor: Aguardando momento exato do ataque (Faltam 0m 50s)
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 8.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 6.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 5.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 6.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 5.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 4.5%
+================================================================================
+LATE-WINDOW TRADE: 2026-06-09 12:43:00 UTC
+Market: btc-updown-15m-1781008200
+Sub-interval #0 (780.6s in = 13.0 min)
+Price: $0.0450 | Bid: $0.0400 | Ask: $0.0500
+Trend strength: STRONG ✓
+Price history: 100 points
+================================================================================
+Mode: LIVE TRADING
+Current price: $0.0450
+Initialized News/Social data source
+✓ Connected to News/Social APIs
+Fear & Greed Index: 10 (Extreme Fear)
+Disconnected from News/Social APIs
+Fear & Greed: 10 (Extreme Fear)
+Initialized Coinbase data source for BTC-USD
+✓ Connected to Coinbase API
+Coinbase BTC price: $62,534.41
+Disconnected from Coinbase API
+Coinbase spot price: $62,534.41
+Market context — deviation=0.00%, momentum=0.00%, volatility=0.0000, sentiment=10, spot=$62534.41
+SpikeDetector: price=0.0450, MA=0.0450, deviation=+0.000%, velocity=+0.000%
+Extreme fear detected: score=10.0 → Contrarian BULLISH signal
+Generated sentiment signal: bullish, score=75.0
+PriceDivergence: poly_prob=0.045, spot_momentum=+0.0000 (+0.00%), spot_price=$62,534.41
+Generated BULLISH fade signal: poly Down prob too high (96%) with weak negative momentum → fade UP, confidence=76.48%
+OrderBook: bids=$133.9, asks=$9859.4, total=$9993.4, imbalance=-0.973
+Wall detected on ask side: $6542.5
+Generated BEARISH signal (OrderBook): imbalance=-0.973, confidence=90.00%, score=95.0
+vel_60s=N/A vel_30s=-18.182%
+Generated BEARISH signal (TickVelocity): vel=-18.182%, accel=+0.0000%, confidence=82.00%, score=91.0
+Deribit: overall_PCR=0.628, short_PCR=0.840 (puts=17352 vs calls=20650 short-dated)
+DeribitPCR: balanced PCR=0.840 (range 0.7–1.2) — no signal
+Generated 4 signal(s):
+[SentimentAnalysis] bullish: score=75.0, confidence=75.00%
+[PriceDivergence] bullish: score=75.7, confidence=76.48%
+[OrderBookImbalance] bearish: score=95.0, confidence=90.00%
+[TickVelocity] bearish: score=91.0, confidence=82.00%
+Signal SentimentAnalysis: dir=SignalDirection.BULLISH, strength=STRONG, conf=0.750, weight=0.05, str_factor=0.750, contrib=0.028125
+→ ADDED to BULLISH → current: 0.028125
+Signal PriceDivergence: dir=SignalDirection.BULLISH, strength=STRONG, conf=0.765, weight=0.18, str_factor=0.750, contrib=0.103254
+→ ADDED to BULLISH → current: 0.131379
+Signal OrderBookImbalance: dir=SignalDirection.BEARISH, strength=VERY_STRONG, conf=0.900, weight=0.30, str_factor=1.000, contrib=0.270000
+→ ADDED to BEARISH → current: 0.270000
+Signal TickVelocity: dir=SignalDirection.BEARISH, strength=VERY_STRONG, conf=0.820, weight=0.25, str_factor=1.000, contrib=0.205000
+→ ADDED to BEARISH → current: 0.475000
+Final: bullish=0.131379 | bearish=0.475000 | total=0.606379
+Fused 4 signals → SignalDirection.BEARISH (score=78.3, conf=80.9%)
+FUSED SIGNAL: bearish (score=78.3, confidence=80.87%)
+[Profile: Bola de Neve (Conservador) ativado]
+TREND: DOWN (95.50% NO probability) → buying NO
+[Snowball] Banca Simulada: $105.74 | 20% = Entrada de $21.15
+Position size: $21.15 | Direction: SHORT
+================================================================================
+LIVE MODE - PLACING REAL ORDER!
+================================================================================
+Buying NO (DOWN) token: 0x7698451b458a6919ed261a1296e6abbb70f2af164875a9832b4d4cc7a97a2fc6-100147328202789941871349232492279845825577562787989568019177419060832515910246.POLYMARKET
+BUY NO (DOWN): dummy qty=5.000000 (patch converts to $21.15 USD)
+REAL ORDER SUBMITTED!
+Order ID: BTC-15MIN-$21-1781008983681
+Direction: NO (DOWN)
+Side: BUY
+Token Quantity: 5.000000
+Estimated Cost: ~$21.15
+Price: $0.0450
+================================================================================
+PerformanceTracker has no order-counter method; ignoring event 'placed'
+Order rejected: PolyApiException[status_code=400, error_message={'error': 'maker address not allowed, please use the deposit wallet flow'}]
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 5.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 4.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 3.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 1.5%
+================================================================================
+SWITCHING TO NEXT MARKET: btc-updown-15m-1781009100
+Current time: 12:45:03 (UTC)
+Market ends at: 13:00:00 (UTC)
+================================================================================
+Trade timer reset — will trade on next tick
+⏳ Status do Motor: Aguardando momento exato do ataque (Faltam 12m 55s)
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 54.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 53.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 52.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 51.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 52.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 53.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 54.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 53.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 52.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 51.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 50.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 49.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 48.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 47.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 45.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 46.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 45.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 44.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 43.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 42.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 41.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 39.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 38.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 37.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 38.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 37.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 36.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 35.5%
+⏳ Status do Motor: Aguardando momento exato do ataque (Faltam 11m 55s)
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 34.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 33.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 32.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 31.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 29.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 30.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 31.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 30.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 31.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 32.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 33.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 35.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 36.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 37.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 38.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 39.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 40.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 41.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 42.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 43.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 44.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 45.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 46.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 45.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 44.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 46.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 47.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 49.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 50.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 51.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 52.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 53.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 54.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 55.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 57.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 59.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 60.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 61.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 60.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 59.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 58.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 57.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 55.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 54.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 53.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 54.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 55.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 54.5%
+⏳ Status do Motor: Aguardando momento exato do ataque (Faltam 10m 55s)
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 53.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 54.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 55.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 54.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 53.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 52.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 51.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 50.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 49.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 48.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🔴 Tendência de BAIXA está em 49.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 50.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 51.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 52.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 53.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 54.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 55.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 56.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 57.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 56.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 57.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 58.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 60.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 61.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 60.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 59.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 58.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 57.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 56.5%
+⏳ Status do Motor: Aguardando momento exato do ataque (Faltam 9m 55s)
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 57.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 58.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 59.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 60.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 61.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 62.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 63.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 64.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 65.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 63.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 62.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 63.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 64.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 63.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 64.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 65.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 66.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 67.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 68.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 70.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 71.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 72.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 73.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 71.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 70.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 69.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 70.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 71.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 72.5%
+⏳ Status do Motor: Aguardando momento exato do ataque (Faltam 8m 55s)
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 73.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 72.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 71.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 70.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 69.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 67.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 66.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 65.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 64.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 63.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 61.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 60.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 61.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 62.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 63.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 64.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 65.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 66.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 67.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 68.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 70.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 69.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 67.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 66.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 67.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 68.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 70.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 69.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 67.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 66.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 65.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 64.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 65.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 66.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 67.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 68.5%
+⏳ Status do Motor: Aguardando momento exato do ataque (Faltam 7m 55s)
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 70.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 71.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 72.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 71.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 72.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 70.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 69.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 70.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 71.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 72.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 73.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 74.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 75.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 76.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 77.5%
+⏳ Status do Motor: Aguardando momento exato do ataque (Faltam 6m 55s)
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 78.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 79.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 80.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 82.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 83.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 84.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 83.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 81.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 80.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 79.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 78.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 77.0%
+⏳ Status do Motor: Aguardando momento exato do ataque (Faltam 5m 55s)
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 78.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 76.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 77.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 78.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 77.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 78.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 79.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 80.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 79.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 78.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 77.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 76.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 75.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 74.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 73.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 74.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 75.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 74.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 73.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 74.5%
+⏳ Status do Motor: Aguardando momento exato do ataque (Faltam 4m 54s)
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 73.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 72.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 73.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 74.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 75.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 76.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 77.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 78.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 79.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 80.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 79.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 78.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 77.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 78.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 77.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 76.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 75.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 74.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 73.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 72.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 71.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 70.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 69.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 67.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 66.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 67.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 68.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 70.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 71.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 72.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 73.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 74.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 75.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 76.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 77.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 78.5%
+⏳ Status do Motor: Aguardando momento exato do ataque (Faltam 3m 54s)
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 79.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 80.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 82.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 83.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 84.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 85.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 86.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 85.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 86.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 87.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 88.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 87.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 86.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 85.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 84.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 83.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 82.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 80.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 79.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 78.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 77.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 76.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 77.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 78.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 79.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 80.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 79.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 78.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 77.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 76.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 77.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 78.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 79.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 81.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 82.5%
+⏳ Status do Motor: Aguardando momento exato do ataque (Faltam 2m 54s)
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 83.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 84.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 85.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 86.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 85.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 86.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 85.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 84.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 85.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 86.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 87.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 88.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 89.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 90.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 89.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 88.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 87.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 88.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 89.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 90.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 89.5%
+⏳ Status do Motor: Aguardando momento exato do ataque (Faltam 1m 54s)
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 90.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 89.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 88.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 87.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 86.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 87.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 88.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 89.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 90.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 91.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 92.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 93.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 92.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 91.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 90.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 89.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 88.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 87.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 86.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 85.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 84.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 83.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 82.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 80.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 82.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 83.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 84.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 85.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 86.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 87.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 88.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 89.5%
+⏳ Status do Motor: Aguardando momento exato do ataque (Faltam 0m 54s)
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 88.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 87.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 86.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 85.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 84.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 83.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 82.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 83.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 82.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 81.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 80.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 81.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 82.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 83.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 84.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 85.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 86.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 87.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 88.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 89.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 88.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 87.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 88.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 89.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 90.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 91.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 92.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 93.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 92.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 93.5%
+================================================================================
+LATE-WINDOW TRADE: 2026-06-09 12:58:00 UTC
+Market: btc-updown-15m-1781009100
+Sub-interval #0 (780.2s in = 13.0 min)
+Price: $0.9450 | Bid: $0.9400 | Ask: $0.9500
+Trend strength: STRONG ✓
+Price history: 100 points
+================================================================================
+Mode: LIVE TRADING
+Current price: $0.9450
+Initialized News/Social data source
+✓ Connected to News/Social APIs
+Fear & Greed Index: 10 (Extreme Fear)
+Disconnected from News/Social APIs
+Fear & Greed: 10 (Extreme Fear)
+Initialized Coinbase data source for BTC-USD
+✓ Connected to Coinbase API
+Coinbase BTC price: $62,542.65
+Disconnected from Coinbase API
+Coinbase spot price: $62,542.65
+Market context — deviation=0.00%, momentum=0.00%, volatility=0.0000, sentiment=10, spot=$62542.65
+SpikeDetector: price=0.9450, MA=0.9450, deviation=+0.000%, velocity=+0.000%
+Extreme fear detected: score=10.0 → Contrarian BULLISH signal
+Generated sentiment signal: bullish, score=75.0
+PriceDivergence: poly_prob=0.945, spot_momentum=+0.0000 (+0.00%), spot_price=$62,542.65
+Generated BEARISH fade signal: poly Up prob too high (94%) with weak momentum → fade DOWN, confidence=75.70%
+OrderBook: bids=$226.0, asks=$9655.7, total=$9881.6, imbalance=-0.954
+Wall detected on ask side: $7034.1
+Generated BEARISH signal (OrderBook): imbalance=-0.954, confidence=90.00%, score=95.0
+vel_60s=N/A vel_30s=+2.162%
+Generated BULLISH signal (TickVelocity): vel=+2.162%, accel=+0.0000%, confidence=68.95%, score=59.5
+Deribit: overall_PCR=0.628, short_PCR=0.840 (puts=17350 vs calls=20643 short-dated)
+DeribitPCR: balanced PCR=0.840 (range 0.7–1.2) — no signal
+Generated 4 signal(s):
+[SentimentAnalysis] bullish: score=75.0, confidence=75.00%
+[PriceDivergence] bearish: score=75.4, confidence=75.70%
+[OrderBookImbalance] bearish: score=95.0, confidence=90.00%
+[TickVelocity] bullish: score=59.5, confidence=68.95%
+Signal SentimentAnalysis: dir=SignalDirection.BULLISH, strength=STRONG, conf=0.750, weight=0.05, str_factor=0.750, contrib=0.028125
+→ ADDED to BULLISH → current: 0.028125
+Signal PriceDivergence: dir=SignalDirection.BEARISH, strength=STRONG, conf=0.757, weight=0.18, str_factor=0.750, contrib=0.102199
+→ ADDED to BEARISH → current: 0.102199
+Signal OrderBookImbalance: dir=SignalDirection.BEARISH, strength=VERY_STRONG, conf=0.900, weight=0.30, str_factor=1.000, contrib=0.270000
+→ ADDED to BEARISH → current: 0.372199
+Signal TickVelocity: dir=SignalDirection.BULLISH, strength=MODERATE, conf=0.689, weight=0.25, str_factor=0.500, contrib=0.086182
+→ ADDED to BULLISH → current: 0.114307
+Final: bullish=0.114307 | bearish=0.372199 | total=0.486507
+Fused 4 signals → SignalDirection.BEARISH (score=76.5, conf=77.4%)
+FUSED SIGNAL: bearish (score=76.5, confidence=77.41%)
+[Profile: Bola de Neve (Conservador) ativado]
+TREND: UP (94.50% YES probability) → buying YES
+[Snowball] Banca Simulada: $105.74 | 20% = Entrada de $21.15
+Position size: $21.15 | Direction: LONG
+================================================================================
+LIVE MODE - PLACING REAL ORDER!
+================================================================================
+Buying YES (UP) token: 0xfe31cfc4d2b241c72a1289a7bdf980bb2e3bac2a2f84bb5644fd5d4f23d61f12-75620640135203104622717057421655063403260221464071268090469889349448055287985.POLYMARKET
+BUY YES (UP): dummy qty=5.000000 (patch converts to $21.15 USD)
+REAL ORDER SUBMITTED!
+Order ID: BTC-15MIN-$21-1781009884179
+Direction: YES (UP)
+Side: BUY
+Token Quantity: 5.000000
+Estimated Cost: ~$21.15
+Price: $0.9450
+================================================================================
+PerformanceTracker has no order-counter method; ignoring event 'placed'
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 92.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 91.5%
+Order rejected: PolyApiException[status_code=400, error_message={'error': 'maker address not allowed, please use the deposit wallet flow'}]
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 92.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 93.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 92.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 93.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 95.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 96.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 95.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 94.0%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 92.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 91.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 90.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 89.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 90.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 91.5%
+⏳ Status do Motor: Aguardando abertura do próximo mercado de 15m
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 92.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 93.5%
+📊 Mercado Movendo: Probabilidade de vitória no 🟢 Tendência de ALTA está em 95.0%
