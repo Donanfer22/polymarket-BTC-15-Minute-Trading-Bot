@@ -1166,9 +1166,11 @@ class IntegratedBTCStrategy(Strategy):
 
     def _save_paper_trades(self):
         import json
+        import os
         try:
+            os.makedirs('data', exist_ok=True)
             trades_data = [t.to_dict() for t in self.paper_trades]
-            with open('paper_trades.json', 'w') as f:
+            with open('data/paper_trades.json', 'w') as f:
                 json.dump(trades_data, f, indent=2)
         except Exception as e:
             logger.error(f"Failed to save paper trades: {e}")
@@ -1177,10 +1179,10 @@ class IntegratedBTCStrategy(Strategy):
         import json
         import os
         from dateutil.parser import parse
-        if not os.path.exists('paper_trades.json'):
+        if not os.path.exists('data/paper_trades.json'):
             return
         try:
-            with open('paper_trades.json', 'r') as f:
+            with open('data/paper_trades.json', 'r') as f:
                 trades_data = json.load(f)
                 for t in trades_data:
                     pt = PaperTrade(

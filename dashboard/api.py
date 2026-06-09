@@ -201,7 +201,7 @@ async def set_mode(update: ModeUpdate, username: str = Depends(get_current_user)
 # --- Data & Metrics Logic ---
 def load_paper_trades():
     try:
-        file_path = Path(__file__).parent.parent / 'paper_trades.json'
+        file_path = Path(__file__).parent.parent / 'data' / 'paper_trades.json'
         with open(file_path, 'r') as f:
             return json.load(f)
     except:

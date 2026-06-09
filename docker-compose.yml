@@ -22,6 +22,8 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+    volumes:
+      - bot_data:/app/data
     restart: unless-stopped
 
   # Painel Web e API (FastAPI)
@@ -39,7 +41,10 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+    volumes:
+      - bot_data:/app/data
     restart: unless-stopped
 
 volumes:
   redis_data:
+  bot_data:
