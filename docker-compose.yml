@@ -14,7 +14,7 @@ services:
   # Robô Principal de Trading
   bot:
     build: .
-    command: python bot.py --live
+    command: tail -f /dev/null
     depends_on:
       - redis
     env_file:
