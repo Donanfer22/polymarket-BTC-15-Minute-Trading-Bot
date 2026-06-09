@@ -1,7 +1,8 @@
 // Constants
 const API_URL = '/api';
-const WS_STATUS_URL = `ws://${window.location.host}/api/ws/status`;
-const WS_LOGS_URL = `ws://${window.location.host}/api/ws/logs`;
+const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const WS_STATUS_URL = `${wsProtocol}//${window.location.host}/api/ws/status`;
+const WS_LOGS_URL = `${wsProtocol}//${window.location.host}/api/ws/logs`;
 
 // State
 let pnlChart = null;
