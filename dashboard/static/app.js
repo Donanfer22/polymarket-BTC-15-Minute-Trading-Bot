@@ -360,9 +360,13 @@ function updateTable(trades) {
         const price = t.price ? `$${t.price.toFixed(4)}` : '-';
         const conf = t.signal_confidence ? `${(t.signal_confidence * 100).toFixed(1)}%` : '-';
 
+        const typeBadge = t.trade_type === 'LIVE' 
+            ? `<span class="badge live" style="margin-left: 8px; font-size: 0.65rem; padding: 0.2rem 0.5rem;">LIVE</span>`
+            : `<span class="badge" style="margin-left: 8px; font-size: 0.65rem; padding: 0.2rem 0.5rem; background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3);">SIM</span>`;
+
         tr.innerHTML = `
             <td>${timeStr}</td>
-            <td><strong>${t.direction}</strong></td>
+            <td style="display: flex; align-items: center;"><strong>${t.direction}</strong> ${typeBadge}</td>
             <td>${size}</td>
             <td>${price}</td>
             <td>${conf}</td>

@@ -88,7 +88,7 @@ MARKET_INTERVAL_SECONDS = 900     # 15-minute markets
 
 @dataclass
 class PaperTrade:
-    """Track paper/simulation trades"""
+    """Track trades for dashboard display"""
     timestamp: datetime
     direction: str
     size_usd: float
@@ -96,6 +96,7 @@ class PaperTrade:
     signal_score: float
     signal_confidence: float
     outcome: str = "PENDING"
+    trade_type: str = "SIM"
 
     def to_dict(self):
         return {
@@ -106,6 +107,7 @@ class PaperTrade:
             'signal_score': self.signal_score,
             'signal_confidence': self.signal_confidence,
             'outcome': self.outcome,
+            'trade_type': getattr(self, 'trade_type', 'SIM')
         }
 
 
@@ -1085,11 +1087,11 @@ class IntegratedBTCStrategy(Strategy):
 
         # --- Phase 5 / 6: Execute ---
         if is_simulation:
-            await self._record_paper_trade(fused, POSITION_SIZE_USD, current_price, direction)
+            await self._record_paper_trade(fused, POSITION_SIZE_USD, current_price, direction, is_live=False)
         else:
             await self._place_real_order(fused, POSITION_SIZE_USD, current_price, direction)
             
-    async def _record_paper_trade(self, signal, position_size, current_price, direction):
+    async def _record_paper_trade(self, signal, position_size, current_price, direction, is_live=False):
         exit_delta = timedelta(minutes=1) if self.test_mode else timedelta(minutes=15)
         exit_time = datetime.now(timezone.utc) + exit_delta
 
@@ -1192,7 +1194,8 @@ class IntegratedBTCStrategy(Strategy):
                         price=float(t['price']),
                         signal_score=float(t.get('signal_score', 0.0)),
                         signal_confidence=float(t.get('signal_confidence', 0.0)),
-                        outcome=t.get('outcome', 'PENDING')
+                        outcome=t.get('outcome', 'PENDING'),
+                        trade_type=t.get('trade_type', 'SIM')
                     )
                     self.paper_trades.append(pt)
         except Exception as e:
@@ -1281,6 +1284,7 @@ class IntegratedBTCStrategy(Strategy):
             logger.info("=" * 80)
 
             self._track_order_event("placed")
+            await self._record_paper_trade(signal, position_size, current_price, direction, is_live=True)
 
         except Exception as e:
             logger.error(f"Error placing real order: {e}")
