@@ -1585,6 +1585,7 @@ def run_integrated_bot(simulation: bool = False, enable_grafana: bool = True, te
         passphrase=passphrase,
         signature_type=2,
         instrument_provider=instrument_cfg,
+        funder=os.environ.get("POLYMARKET_FUNDER")
     )
 
     config_kwargs = {
