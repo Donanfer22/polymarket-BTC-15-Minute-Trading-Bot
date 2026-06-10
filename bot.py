@@ -1552,17 +1552,7 @@ def run_integrated_bot(simulation: bool = False, enable_grafana: bool = True, te
         except Exception as e:
             logger.warning(f"Failed to load credentials from Redis: {e}")
 
-    # --- PROXY WALLET DERIVATION OVERRIDE ---
-    # Must be done AFTER Redis loads the private_key.
-    if private_key:
-        try:
-            from py_clob_client.client import ClobClient
-            temp_client = ClobClient("https://clob.polymarket.com", key=private_key, chain_id=137, signature_type=2)
-            derived_proxy = temp_client.get_address()
-            os.environ["POLYMARKET_FUNDER"] = derived_proxy
-            logger.info(f"Derived Proxy Wallet Address: {derived_proxy}")
-        except Exception as e:
-            logger.error(f"Failed to derive proxy wallet: {e}")
+
 
     if not (api_key and api_secret and passphrase):
         api_key = None
