@@ -1032,25 +1032,11 @@ class IntegratedBTCStrategy(Strategy):
         if not direction:
             return
 
-        # --- Position Sizing based on profile ---
+        # --- Position Sizing ---
+        # ALL profiles now strictly respect the dashboard value to ensure live trading safety
+        POSITION_SIZE_USD = Decimal(trade_size_val)
         if strategy_profile == "snowball":
-            # Calculate 20% of compounded bankroll
-            # Bankroll starts at 100.0, we add PNL of all past trades
-            base_bankroll = 100.0
-            total_pnl = 0.0
-            for pt in self.paper_trades:
-                if pt.outcome == 'WIN':
-                    total_pnl += pt.size_usd * 0.20
-                elif pt.outcome == 'LOSS':
-                    total_pnl -= pt.size_usd * 0.30
-            current_bankroll = base_bankroll + total_pnl
-            if current_bankroll < 10.0: current_bankroll = 10.0 # floor
-            dynamic_size = current_bankroll * 0.20
-            POSITION_SIZE_USD = Decimal(str(round(dynamic_size, 2)))
-            logger.info(f"  [Snowball] Banca Simulada: ${current_bankroll:.2f} | 20% = Entrada de ${float(POSITION_SIZE_USD):.2f}")
-        else:
-            # Sniper and Reversal use fixed dashboard size
-            POSITION_SIZE_USD = Decimal(trade_size_val)
+            logger.info(f"  [Snowball] Usando entrada fixa do Dashboard: ${float(POSITION_SIZE_USD):.2f}")
         
         # Risk engine: only check position-count / exposure limits (no sizing math)
         is_valid, error = self.risk_engine.validate_new_position(
