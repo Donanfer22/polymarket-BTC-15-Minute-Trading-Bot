@@ -1115,6 +1115,7 @@ class IntegratedBTCStrategy(Strategy):
             signal_score=signal.score,
             signal_confidence=signal.confidence,
             outcome=outcome,
+            trade_type="LIVE" if is_live else "SIM"
         )
         self.paper_trades.append(paper_trade)
 
@@ -1140,7 +1141,8 @@ class IntegratedBTCStrategy(Strategy):
             self.grafana_exporter.record_trade_duration(exit_delta.total_seconds())
 
         logger.info("=" * 80)
-        logger.info("[SIMULATION] PAPER TRADE RECORDED")
+        prefix = "[LIVE TRADING]" if is_live else "[SIMULATION]"
+        logger.info(f"{prefix} PAPER TRADE RECORDED")
         logger.info(f"  Direction: {direction.upper()}")
         logger.info(f"  Size: ${float(position_size):.2f}")
         logger.info(f"  Entry Price: ${float(current_price):,.4f}")
@@ -1234,6 +1236,13 @@ class IntegratedBTCStrategy(Strategy):
             max_usd_amount = float(position_size)
 
             precision = instrument.size_precision
+
+            # --- DYNAMIC PATCH FIX ---
+            # The nautilus patch reads MARKET_BUY_USD for market orders.
+            # We must pass the user's size dynamically, otherwise it defaults to $1.00
+            # which Polymarket silently rejects since the minimum is $5.00.
+            import os
+            os.environ["MARKET_BUY_USD"] = str(max_usd_amount)
 
             # Always BUY — the market-order patch converts this to a USD amount.
             # Pass dummy qty=5 (minimum) so Nautilus risk engine doesn't deny it.
