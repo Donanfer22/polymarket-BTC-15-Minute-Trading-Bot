@@ -1578,19 +1578,26 @@ def run_integrated_bot(simulation: bool = False, enable_grafana: bool = True, te
         instrument_provider=instrument_cfg,
     )
 
-    config = TradingNodeConfig(
-        environment="live",
-        trader_id="BTC-15MIN-INTEGRATED-001",
-        logging=LoggingConfig(
+    config_kwargs = {
+        "environment": "live",
+        "trader_id": "BTC-15MIN-INTEGRATED-001",
+        "logging": LoggingConfig(
             log_level="INFO",
             log_directory="./logs/nautilus",
         ),
-        data_engine=LiveDataEngineConfig(qsize=6000),
-        exec_engine=LiveExecEngineConfig(qsize=6000),
-        risk_engine=LiveRiskEngineConfig(bypass=simulation),
-        data_clients={POLYMARKET: poly_data_cfg},
-        exec_clients={POLYMARKET: poly_exec_cfg},
-    )
+        "data_engine": LiveDataEngineConfig(qsize=6000),
+        "exec_engine": LiveExecEngineConfig(qsize=6000),
+        "risk_engine": LiveRiskEngineConfig(bypass=simulation),
+        "data_clients": {POLYMARKET: poly_data_cfg},
+    }
+
+    has_creds = bool(api_key and api_secret and passphrase)
+    if has_creds:
+        config_kwargs["exec_clients"] = {POLYMARKET: poly_exec_cfg}
+    else:
+        logger.warning("Nenhuma credencial da API encontrada - Exec Client desativado (Apenas Simulacao)")
+
+    config = TradingNodeConfig(**config_kwargs)
 
     strategy = IntegratedBTCStrategy(
         redis_client=redis_client,
@@ -1602,7 +1609,8 @@ def run_integrated_bot(simulation: bool = False, enable_grafana: bool = True, te
     print("\nBuilding Nautilus node...")
     node = TradingNode(config=config)
     node.add_data_client_factory(POLYMARKET, PolymarketLiveDataClientFactory)
-    node.add_exec_client_factory(POLYMARKET, PolymarketLiveExecClientFactory)
+    if has_creds:
+        node.add_exec_client_factory(POLYMARKET, PolymarketLiveExecClientFactory)
     node.trader.add_strategy(strategy)
     node.build()
     logger.info("Nautilus node built successfully")
