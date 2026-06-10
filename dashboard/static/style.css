@@ -350,8 +350,10 @@ h2 i {
 /* Tables */
 .table-container {
     overflow-x: auto;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     width: 100%;
+    max-height: 400px;
 }
 
 table {
@@ -362,6 +364,10 @@ table {
 }
 
 th {
+    position: sticky;
+    top: 0;
+    background: var(--glass-bg);
+    z-index: 10;
     white-space: nowrap;
     text-align: left;
     padding: 1rem;
