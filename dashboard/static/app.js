@@ -259,7 +259,7 @@ function updateDashboard(data) {
     document.getElementById('val-total-trades').innerText = data.metrics.total_trades;
 
     updateChart(data.recent_trades);
-    updateTable(data.recent_trades);
+    updateTable(data.recent_trades.slice(0, 10));
 }
 
 function initChart() {
