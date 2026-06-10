@@ -1577,7 +1577,7 @@ def run_integrated_bot(simulation: bool = False, enable_grafana: bool = True, te
         ),
         "data_engine": LiveDataEngineConfig(qsize=6000),
         "exec_engine": LiveExecEngineConfig(qsize=6000),
-        "risk_engine": LiveRiskEngineConfig(bypass=simulation),
+        "risk_engine": LiveRiskEngineConfig(bypass=True),
         "data_clients": {POLYMARKET: poly_data_cfg},
     }
 
