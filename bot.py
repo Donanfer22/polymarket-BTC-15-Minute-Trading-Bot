@@ -1539,6 +1539,20 @@ def run_integrated_bot(simulation: bool = False, enable_grafana: bool = True, te
     passphrase = os.getenv("POLYMARKET_PASSPHRASE")
     private_key = os.getenv("POLYMARKET_PK")
 
+    # --- PROXY WALLET DERIVATION OVERRIDE ---
+    # Se o usuário configurou o POLYMARKET_FUNDER errado no Coolify,
+    # o Nautilus falha na hora de enviar. Precisamos sobrescrever
+    # derivando direto pelo SDK.
+    if private_key:
+        try:
+            from py_clob_client.client import ClobClient
+            temp_client = ClobClient("https://clob.polymarket.com", key=private_key, chain_id=137, signature_type=2)
+            derived_proxy = temp_client.get_address()
+            os.environ["POLYMARKET_FUNDER"] = derived_proxy
+            logger.info(f"Derived Proxy Wallet Address: {derived_proxy}")
+        except Exception as e:
+            logger.error(f"Failed to derive proxy wallet: {e}")
+
     if redis_client:
         try:
             import json
