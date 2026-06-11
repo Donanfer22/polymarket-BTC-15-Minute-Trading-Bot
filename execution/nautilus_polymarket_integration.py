@@ -204,6 +204,8 @@ class PolymarketBTCIntegration:
             api_key=os.getenv("POLYMARKET_API_KEY"),
             api_secret=os.getenv("POLYMARKET_API_SECRET"),
             passphrase=os.getenv("POLYMARKET_PASSPHRASE"),
+            signature_type=2,  # Required for deposit wallet flow
+            funder=os.getenv("POLYMARKET_FUNDER"),
             instrument_provider=instrument_cfg,
         )
         
