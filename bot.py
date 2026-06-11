@@ -71,6 +71,7 @@ from monitoring.grafana_exporter import get_grafana_exporter
 from feedback.learning_engine import get_learning_engine
 load_dotenv()
 from patch_market_orders import apply_market_order_patch
+apply_market_order_patch()
 patch_applied = apply_market_order_patch()
 if patch_applied:
     logger.info("Market order patch applied successfully")
