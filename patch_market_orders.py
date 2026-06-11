@@ -26,16 +26,14 @@ def _make_funder_clob():
         "https://clob.polymarket.com",
         key=pk,
         chain_id=137,
-        signature_type=1,
-        # POLY_PROXY — deposit wallet flow correto
-        funder=funder,
+        signature_type=0,
     )
     clob.set_api_creds(ApiCreds(
         api_key=os.getenv("POLYMARKET_API_KEY", ""),
         api_secret=os.getenv("POLYMARKET_API_SECRET", ""),
         api_passphrase=os.getenv("POLYMARKET_PASSPHRASE", ""),
     ))
-    logger.info(f"[PATCH] ClobClient funder={funder[:12]}... signature_type=2")
+    logger.info(f"[PATCH] ClobClient EOA direct (sig_type=0)")
     return clob
 
 
