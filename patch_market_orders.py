@@ -26,7 +26,8 @@ def _make_funder_clob():
         "https://clob.polymarket.com",
         key=pk,
         chain_id=137,
-        signature_type=2,
+        signature_type=1,
+        # POLY_PROXY — deposit wallet flow correto
         funder=funder,
     )
     clob.set_api_creds(ApiCreds(
