@@ -1251,20 +1251,20 @@ class IntegratedBTCStrategy(Strategy):
                 f"(Native Py-Clob-Client)"
             )
 
-            qty = Quantity(float(max_usd_amount), precision=2)
             timestamp_ms = int(time.time() * 1000)
             unique_id = f"BTC-15MIN-${max_usd_amount:.0f}-{timestamp_ms}"
 
-            order = self.order_factory.market(
-                instrument_id=trade_instrument_id,
-                order_side=side,
-                quantity=qty,
-                client_order_id=ClientOrderId(unique_id),
-                quote_quantity=True,
-                time_in_force=TimeInForce.IOC,
-            )
-
-            self.submit_order(order)
+            # BYPASS: direct py-clob-client order, skip Nautilus order engine
+            from py_clob_client.client import ClobClient
+            from py_clob_client.clob_types import MarketOrderArgs
+            pk = os.getenv("POLYMARKET_PK", "")
+            pk = "0x"+pk if not pk.startswith("0x") else pk
+            c = ClobClient("https://clob.polymarket.com", key=pk, chain_id=137, signature_type=0)
+            c.set_api_creds(c.create_or_derive_api_creds())
+            token_hash = str(trade_instrument_id.value).split("-")[0]
+            resp = c.create_and_post_order(MarketOrderArgs(token_id=token_hash, amount=max_usd_amount, side="BUY"))
+            logger.info(f"ORDEM BYPASS ENVIADA: {resp}")
+            unique_id = resp.get("orderID", unique_id) if isinstance(resp, dict) else unique_id
 
             logger.info(f"REAL ORDER SUBMITTED!")
             logger.info(f"  Order ID: {unique_id}")
