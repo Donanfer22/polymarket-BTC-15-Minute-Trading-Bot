@@ -1259,8 +1259,15 @@ class IntegratedBTCStrategy(Strategy):
             from py_clob_client_v2.clob_types import MarketOrderArgs
             pk = os.getenv("POLYMARKET_PK", "")
             pk = "0x"+pk if not pk.startswith("0x") else pk
-            c = ClobClient("https://clob.polymarket.com", key=pk, chain_id=137, signature_type=0)
-            c.set_api_creds(c.create_or_derive_api_key())
+            from py_clob_client_v2.clob_types import ApiCreds
+            c = ClobClient("https://clob.polymarket.com", key=pk, chain_id=137, signature_type=2,
+                           funder=os.getenv("POLYMARKET_FUNDER",""))
+            creds = ApiCreds(
+                api_key=os.getenv("POLYMARKET_API_KEY",""),
+                api_secret=os.getenv("POLYMARKET_API_SECRET",""),
+                api_passphrase=os.getenv("POLYMARKET_PASSPHRASE","")
+            )
+            c.set_api_creds(creds)
             token_hash = str(trade_instrument_id.value).split("-")[1].split(".")[0]
             raw_order = c.create_market_order(MarketOrderArgs(token_id=token_hash, amount=max_usd_amount, side="BUY"))
             resp = c.post_order(raw_order)
