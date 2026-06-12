@@ -1256,7 +1256,10 @@ class IntegratedBTCStrategy(Strategy):
 
             # BYPASS: direct py-clob-client order, skip Nautilus order engine
             from py_clob_client_v2.client import ClobClient
-            from py_clob_client_v2.clob_types import MarketOrderArgs, ApiCreds
+            from py_clob_client_v2.clob_types import OrderArgs, ApiCreds, PartialCreateOrderOptions
+            from py_clob_client_v2.order_builder.constants import BUY, SELL
+            from py_clob_client_v2 import SignatureTypeV2
+
             pk = os.getenv("POLYMARKET_PK", "")
             pk = "0x"+pk if not pk.startswith("0x") else pk
             creds = ApiCreds(
@@ -1264,12 +1267,20 @@ class IntegratedBTCStrategy(Strategy):
                 api_secret=os.getenv("POLYMARKET_API_SECRET",""),
                 api_passphrase=os.getenv("POLYMARKET_PASSPHRASE","")
             )
-            c = ClobClient("https://clob.polymarket.com", key=pk, chain_id=137, signature_type=2,
-                           funder=os.getenv("POLYMARKET_FUNDER",""))
-            c.set_api_creds(creds)
+            c = ClobClient(
+                host="https://clob.polymarket.com",
+                key=pk,
+                chain_id=137,
+                creds=creds,
+                signature_type=SignatureTypeV2.POLY_1271,
+                funder="0xea4F4653b5F1d0bE4AC87f001Db8D8aDA109e703"
+            )
             token_hash = str(trade_instrument_id.value).split("-")[1].split(".")[0]
-            raw_order = c.create_market_order(MarketOrderArgs(token_id=token_hash, amount=max_usd_amount, side="BUY"))
-            resp = c.post_order(raw_order)
+            side = BUY if direction == "YES" else SELL
+            resp = c.create_and_post_order(
+                OrderArgs(token_id=token_hash, price=float(trade_price), size=float(max_usd_amount), side=side),
+                options=PartialCreateOrderOptions(tick_size="0.01", neg_risk=False)
+            )
             logger.info(f"ORDEM BYPASS ENVIADA: {resp}")
             unique_id = resp.get("orderID", unique_id) if isinstance(resp, dict) else unique_id
 
