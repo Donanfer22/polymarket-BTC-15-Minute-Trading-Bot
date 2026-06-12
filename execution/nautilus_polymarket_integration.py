@@ -337,8 +337,8 @@ class PolymarketBTCIntegration:
             precision = instrument.size_precision
             token_qty = round(token_qty, precision)
             
-            # Create quantity
-            qty = Quantity(token_qty, precision=precision)
+            # Create quantity using USD
+            qty = Quantity(float(size_usd), precision=2)
             
             # Generate unique order ID
             timestamp_ms = int(datetime.now().timestamp() * 1000)
@@ -351,7 +351,7 @@ class PolymarketBTCIntegration:
                 order_side=order_side,
                 quantity=qty,
                 client_order_id=ClientOrderId(order_id),
-                quote_quantity=False,  # TOKENS, not USD
+                quote_quantity=True,  # Changed to True for USD amount
                 time_in_force=TimeInForce.IOC,  # Immediate or cancel
             )
             

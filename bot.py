@@ -1247,11 +1247,11 @@ class IntegratedBTCStrategy(Strategy):
             token_qty = max(min_qty_val, 5.0)
             token_qty = round(token_qty, precision)
             logger.info(
-                f"BUY {trade_label}: dummy qty={token_qty:.6f} "
-                f"(patch converts to ${max_usd_amount:.2f} USD)"
+                f"BUY {trade_label}: qty={max_usd_amount:.2f} USD "
+                f"(Native Py-Clob-Client)"
             )
 
-            qty = Quantity(token_qty, precision=precision)
+            qty = Quantity(float(max_usd_amount), precision=2)
             timestamp_ms = int(time.time() * 1000)
             unique_id = f"BTC-15MIN-${max_usd_amount:.0f}-{timestamp_ms}"
 
@@ -1260,7 +1260,7 @@ class IntegratedBTCStrategy(Strategy):
                 order_side=side,
                 quantity=qty,
                 client_order_id=ClientOrderId(unique_id),
-                quote_quantity=False,
+                quote_quantity=True,
                 time_in_force=TimeInForce.IOC,
             )
 
