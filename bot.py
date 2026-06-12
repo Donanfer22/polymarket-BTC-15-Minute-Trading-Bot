@@ -1272,20 +1272,11 @@ class IntegratedBTCStrategy(Strategy):
                 key=pk,
                 chain_id=137,
                 creds=creds,
-                signature_type=SignatureTypeV2.POLY_1271,
-                funder="0xea4F4653b5F1d0bE4AC87f001Db8D8aDA109e703"
+                signature_type=0
             )
-
-            # Força POLY_ADDRESS para deposit wallet
-            original_l2_headers = c._l2_headers
-            def patched_l2_headers(method, path):
-                headers = original_l2_headers(method, path)
-                headers['POLY_ADDRESS'] = '0xea4F4653b5F1d0bE4AC87f001Db8D8aDA109e703'
-                return headers
-            c._l2_headers = patched_l2_headers
             
             from py_clob_client_v2.clob_types import BalanceAllowanceParams, AssetType
-            c.update_balance_allowance(BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=SignatureTypeV2.POLY_1271))
+            c.update_balance_allowance(BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=0))
             
             token_hash = str(trade_instrument_id.value).split("-")[1].split(".")[0]
             side = BUY if direction == "YES" else SELL
