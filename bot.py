@@ -1262,7 +1262,8 @@ class IntegratedBTCStrategy(Strategy):
             c = ClobClient("https://clob.polymarket.com", key=pk, chain_id=137, signature_type=0)
             c.set_api_creds(c.create_or_derive_api_creds())
             token_hash = str(trade_instrument_id.value).split("-")[1].split(".")[0]
-            resp = c.create_and_post_order(MarketOrderArgs(token_id=token_hash, size=max_usd_amount, price=trade_price, side="BUY"))
+            raw_order = c.create_market_order(MarketOrderArgs(token_id=token_hash, amount=max_usd_amount, side="BUY"))
+            resp = c.post_order(raw_order)
             logger.info(f"ORDEM BYPASS ENVIADA: {resp}")
             unique_id = resp.get("orderID", unique_id) if isinstance(resp, dict) else unique_id
 
