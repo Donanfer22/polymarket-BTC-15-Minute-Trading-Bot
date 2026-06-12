@@ -8,7 +8,7 @@ pk = '0x'+pk if not pk.startswith('0x') else pk
 
 print("Gerando novas chaves de API para a sua carteira EOA (MetaMask)...")
 c = ClobClient('https://clob.polymarket.com', key=pk, chain_id=137, signature_type=0)
-creds = c.create_or_derive_api_creds()
+creds = c.create_or_derive_api_key()
 
 env_path = os.path.join(os.path.dirname(__file__), '.env')
 set_key(env_path, 'POLYMARKET_API_KEY', creds.api_key)

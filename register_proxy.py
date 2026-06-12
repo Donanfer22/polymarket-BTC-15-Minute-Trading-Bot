@@ -15,7 +15,7 @@ c = ClobClient('https://clob.polymarket.com', key=pk, chain_id=137,
                signature_type=1, funder=funder)
 
 # Esta chamada registra o EOA como operador autorizado do funder
-creds = c.create_or_derive_api_creds()
+creds = c.create_or_derive_api_key()
 print(f"\nCredenciais com sig_type=1:")
 print(f"POLYMARKET_API_KEY={creds.api_key}")
 print(f"POLYMARKET_API_SECRET={creds.api_secret}")

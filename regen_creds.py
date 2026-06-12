@@ -17,7 +17,7 @@ client = ClobClient(
     funder=funder
 )
 
-creds = client.create_or_derive_api_creds()
+creds = client.create_or_derive_api_key()
 print()
 print("=== COLE NO COOLIFY ===")
 print(f"POLYMARKET_API_KEY={creds.api_key}")

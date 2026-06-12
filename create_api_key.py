@@ -28,7 +28,7 @@ def main():
         client = ClobClient(host, key=private_key, chain_id=chain_id)
         
         print("\nGerando chaves da API na Polymarket...")
-        creds = client.create_or_derive_api_creds()
+        creds = client.create_or_derive_api_key()
         
         print("\n" + "="*60)
         print("✅ SUCESSO! SUAS NOVAS CHAVES ESTÃO ABAIXO:")
