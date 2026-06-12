@@ -1,8 +1,8 @@
 from dotenv import load_dotenv
 import os
 load_dotenv()
-from py_clob_client.client import ClobClient
-from py_clob_client.clob_types import BalanceAllowanceParams, AssetType
+from py_clob_client_v2.client import ClobClient
+from py_clob_client_v2.clob_types import BalanceAllowanceParams, AssetType
 
 pk = os.getenv('POLYMARKET_PK')
 pk = '0x'+pk if not pk.startswith('0x') else pk

@@ -14,8 +14,8 @@ _patch_applied = False
 
 def _make_funder_clob():
     """Cria ClobClient com signature_type=2 e funder — corrige o maker address."""
-    from py_clob_client.client import ClobClient
-    from py_clob_client.clob_types import ApiCreds
+    from py_clob_client_v2.client import ClobClient
+    from py_clob_client_v2.clob_types import ApiCreds
 
     pk = os.getenv("POLYMARKET_PK", "")
     if pk and not pk.startswith("0x"):
@@ -48,7 +48,7 @@ def apply_market_order_patch():
         from nautilus_trader.adapters.polymarket.http.conversion import convert_tif_to_polymarket_order_type
         from nautilus_trader.model.enums import OrderSide, order_side_to_str
         from nautilus_trader.common.enums import LogColor
-        from py_clob_client.client import MarketOrderArgs, PartialCreateOrderOptions
+        from py_clob_client_v2.client import MarketOrderArgs, PartialCreateOrderOptions
 
         _DEFAULT_USD = float(os.getenv("MARKET_BUY_USD", "5.0"))
 

@@ -1255,8 +1255,8 @@ class IntegratedBTCStrategy(Strategy):
             unique_id = f"BTC-15MIN-${max_usd_amount:.0f}-{timestamp_ms}"
 
             # BYPASS: direct py-clob-client order, skip Nautilus order engine
-            from py_clob_client.client import ClobClient
-            from py_clob_client.clob_types import MarketOrderArgs
+            from py_clob_client_v2.client import ClobClient
+            from py_clob_client_v2.clob_types import MarketOrderArgs
             pk = os.getenv("POLYMARKET_PK", "")
             pk = "0x"+pk if not pk.startswith("0x") else pk
             c = ClobClient("https://clob.polymarket.com", key=pk, chain_id=137, signature_type=0)

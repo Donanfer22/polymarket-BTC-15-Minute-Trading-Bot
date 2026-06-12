@@ -1,5 +1,5 @@
 import os
-from py_clob_client.client import ClobClient
+from py_clob_client_v2.client import ClobClient
 
 def main():
     print("=========================================================")

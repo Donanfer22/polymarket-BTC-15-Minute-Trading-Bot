@@ -9,9 +9,9 @@ from datetime import datetime
 from typing import Optional, Dict, Any, List
 from loguru import logger
 
-from py_clob_client.client import ClobClient
-from py_clob_client.clob_types import OrderArgs, OrderType as PolyOrderType
-from py_clob_client.order_builder.constants import BUY, SELL
+from py_clob_client_v2.client import ClobClient
+from py_clob_client_v2.clob_types import OrderArgs, OrderType as PolyOrderType
+from py_clob_client_v2.order_builder.constants import BUY, SELL
 POLYMARKET_AVAILABLE = True
 
 
