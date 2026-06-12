@@ -217,7 +217,7 @@ class PolymarketBTCIntegration:
                 log_directory="./logs/nautilus",
             ),
             data_engine=LiveDataEngineConfig(qsize=6000),
-            exec_engine=LiveExecEngineConfig(qsize=6000),
+            exec_engine=LiveExecEngineConfig(qsize=6000, convert_quote_qty_to_base=False),
             risk_engine=LiveRiskEngineConfig(
                 bypass=self.simulation_mode,  # Bypass in simulation
             ),
