@@ -1267,6 +1267,8 @@ class IntegratedBTCStrategy(Strategy):
                     private_key=pk
                 ) as client:
                     client = await client.setup_gasless_wallet()
+                    # Garantir que o SDK lê o saldo antes de enviar ordem
+                    await client.get_balance_allowance(asset_type='COLLATERAL')
                     side = "BUY" if direction == "YES" else "SELL"
                     if side == "BUY":
                         response = await client.place_market_order(
