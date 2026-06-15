@@ -1268,12 +1268,20 @@ class IntegratedBTCStrategy(Strategy):
                 ) as client:
                     client = await client.setup_gasless_wallet()
                     side = "BUY" if direction == "YES" else "SELL"
-                    response = await client.place_market_order(
-                        token_id=token_hash,
-                        side=side,
-                        amount=str(max_usd_amount),
-                        order_type="FAK"
-                    )
+                    if side == "BUY":
+                        response = await client.place_market_order(
+                            token_id=token_hash,
+                            side=side,
+                            amount=str(max_usd_amount),
+                            order_type="FAK"
+                        )
+                    else:
+                        response = await client.place_market_order(
+                            token_id=token_hash,
+                            side=side,
+                            shares=str(max_usd_amount),
+                            order_type="FOK"
+                        )
                     return response
 
             resp = await _place_order()
