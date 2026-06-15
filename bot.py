@@ -1264,8 +1264,7 @@ class IntegratedBTCStrategy(Strategy):
 
             async def _place_order():
                 async with await AsyncSecureClient.create(
-                    private_key=pk,
-                    wallet="0xea4F4653b5F1d0bE4AC87f001Db8D8aDA109e703"
+                    private_key=pk
                 ) as client:
                     client = await client.setup_gasless_wallet()
                     side = "BUY" if direction == "YES" else "SELL"
