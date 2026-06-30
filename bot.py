@@ -1260,30 +1260,31 @@ class IntegratedBTCStrategy(Strategy):
 
             pk = os.getenv("POLYMARKET_PK", "")
             pk = "0x" + pk if not pk.startswith("0x") else pk
+            # FIX: passar a carteira de depósito existente (POLYMARKET_FUNDER).
+            # Sem isso o SDK tenta DEPLOYAR uma carteira nova (gasless) e exige
+            # uma Builder/Relayer API Key, quebrando com UserInputError. Ver Issue #70.
+            funder = os.getenv("POLYMARKET_FUNDER", "") or None
             token_hash = str(trade_instrument_id.value).split("-")[1].split(".")[0]
 
             async def _place_order():
                 async with await AsyncSecureClient.create(
-                    private_key=pk
+                    private_key=pk,
+                    wallet=funder,
                 ) as client:
                     client = await client.setup_gasless_wallet()
                     # Garantir que o SDK lê o saldo antes de enviar ordem
                     await client.get_balance_allowance(asset_type='COLLATERAL')
-                    side = "BUY" if direction == "YES" else "SELL"
-                    if side == "BUY":
-                        response = await client.place_market_order(
-                            token_id=token_hash,
-                            side=side,
-                            amount=str(max_usd_amount),
-                            order_type="FAK"
-                        )
-                    else:
-                        response = await client.place_market_order(
-                            token_id=token_hash,
-                            side=side,
-                            shares=str(max_usd_amount),
-                            order_type="FOK"
-                        )
+                    # FIX: na Polymarket TODA aposta é um BUY do token escolhido
+                    # (YES p/ long, NO p/ short — o token já foi selecionado acima).
+                    # Antes: side = "BUY" if direction == "YES" else "SELL", mas
+                    # direction é "long"/"short" (nunca "YES") → resultava em SELL sempre.
+                    side = "BUY"
+                    response = await client.place_market_order(
+                        token_id=token_hash,
+                        side=side,
+                        amount=str(max_usd_amount),
+                        order_type="FAK"
+                    )
                     return response
 
             resp = await _place_order()
