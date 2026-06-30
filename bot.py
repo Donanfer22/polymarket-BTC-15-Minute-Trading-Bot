@@ -1271,7 +1271,11 @@ class IntegratedBTCStrategy(Strategy):
                     private_key=pk,
                     wallet=funder,
                 ) as client:
-                    client = await client.setup_gasless_wallet()
+                    # NÃO chamar setup_gasless_wallet(): ela reatribui o client para
+                    # uma "gasless wallet" cujo maker é a EOA, que a Polymarket rejeita
+                    # ("maker address not allowed, please use the deposit wallet flow").
+                    # Usamos direto o client do deposit wallet (create wallet=funder).
+                    # Ref: thread Issue #70 (ethanhunt1011) — não usava setup_gasless_wallet.
                     # Garantir que o SDK lê o saldo antes de enviar ordem
                     await client.get_balance_allowance(asset_type='COLLATERAL')
                     # FIX: na Polymarket TODA aposta é um BUY do token escolhido
