@@ -1035,7 +1035,26 @@ class IntegratedBTCStrategy(Strategy):
         # então nunca deixamos o tamanho da entrada cair abaixo do mínimo.
         POSITION_SIZE_USD = max(Decimal(trade_size_val), Decimal("5.00"))
         if strategy_profile == "snowball":
-            logger.info(f"  [Snowball] Usando entrada fixa do Dashboard: ${float(POSITION_SIZE_USD):.2f}")
+            # JUROS COMPOSTOS: entrada = % do Caixa REAL (pUSD on-chain), nao de
+            # uma "banca simulada" fixa. Assim a entrada cresce de verdade conforme
+            # a banca aumenta (ganhos resgatados) e encolhe se o caixa cai.
+            import os as _os
+            snowball_pct = Decimal(_os.getenv("SNOWBALL_PCT", "0.20"))  # 20% padrao
+            cash = self._get_available_cash_usd()
+            if cash and cash >= 5.0:
+                entry = (Decimal(str(cash)) * snowball_pct).quantize(Decimal("0.01"))
+                entry = max(Decimal("5.00"), entry)      # nunca abaixo do minimo Polymarket
+                entry = min(entry, Decimal(str(cash)))    # nunca mais que o caixa disponivel
+                POSITION_SIZE_USD = entry
+                logger.info(
+                    f"  [Snowball/Juros Compostos] Caixa real ${cash:.2f} x "
+                    f"{float(snowball_pct):.0%} → entrada ${float(POSITION_SIZE_USD):.2f}"
+                )
+            else:
+                logger.info(
+                    f"  [Snowball] Caixa real indisponivel/baixo — "
+                    f"usando entrada fixa ${float(POSITION_SIZE_USD):.2f}"
+                )
         
         # Risk engine: only check position-count / exposure limits (no sizing math)
         is_valid, error = self.risk_engine.validate_new_position(
@@ -1224,9 +1243,14 @@ class IntegratedBTCStrategy(Strategy):
         except Exception as e:
             logger.warning(f"Falha ao incrementar contador diario de entradas LIVE: {e}")
 
-    def _get_available_cash_usd(self):
-        """Le o Caixa real (saldo pUSD do funder) on-chain. Retorna float ou None (fail-open)."""
-        import os
+    def _get_available_cash_usd(self, max_age_s: float = 60.0):
+        """Le o Caixa real (saldo pUSD do funder) on-chain, com cache curto.
+        Retorna float ou None (fail-open). O cache evita spam de RPC (test-mode
+        opera a cada minuto e a leitura e usada por 2 travas + sizing)."""
+        import os, time
+        cached = getattr(self, '_cash_cache', None)
+        if cached and (time.time() - cached[1]) < max_age_s:
+            return cached[0]
         funder = os.getenv("POLYMARKET_FUNDER", "")
         if not funder:
             return None
@@ -1239,8 +1263,9 @@ class IntegratedBTCStrategy(Strategy):
                     "name": "balanceOf", "outputs": [{"name": "", "type": "uint256"}],
                     "type": "function"}]
             c = w3.eth.contract(address=pusd, abi=abi)
-            bal = c.functions.balanceOf(Web3.to_checksum_address(funder)).call()
-            return bal / 1e6
+            bal = c.functions.balanceOf(Web3.to_checksum_address(funder)).call() / 1e6
+            self._cash_cache = (bal, time.time())
+            return bal
         except Exception as e:
             # fail-open: se nao conseguir ler, nao bloqueia (o teto diario ja limita a exposicao)
             logger.warning(f"Falha ao ler Caixa on-chain (fail-open, nao bloqueia): {e}")
