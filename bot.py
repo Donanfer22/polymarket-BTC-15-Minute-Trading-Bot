@@ -94,6 +94,9 @@ class PaperTrade:
     signal_confidence: float
     outcome: str = "PENDING"
     trade_type: str = "SIM"
+    token_id: str = ""      # token comprado — usado p/ ler o resultado real em LIVE
+    market_id: str = ""
+    pnl_usd: float = 0.0     # PnL realizado (preenchido na resolucao)
 
     def to_dict(self):
         return {
@@ -104,7 +107,10 @@ class PaperTrade:
             'signal_score': self.signal_score,
             'signal_confidence': self.signal_confidence,
             'outcome': self.outcome,
-            'trade_type': getattr(self, 'trade_type', 'SIM')
+            'trade_type': getattr(self, 'trade_type', 'SIM'),
+            'token_id': getattr(self, 'token_id', ''),
+            'market_id': getattr(self, 'market_id', ''),
+            'pnl_usd': getattr(self, 'pnl_usd', 0.0),
         }
 
 
@@ -926,6 +932,13 @@ class IntegratedBTCStrategy(Strategy):
         is_simulation = await self.check_simulation_mode()
         logger.info(f"Mode: {'SIMULATION' if is_simulation else 'LIVE TRADING'}")
 
+        # Resolve trades LIVE pendentes (le o resultado REAL do mercado ja fechado).
+        # Nunca deve derrubar a decisao — protegido por try/except.
+        try:
+            self._resolve_pending_live_trades()
+        except Exception as e:
+            logger.warning(f"Falha ao resolver trades LIVE pendentes: {e}")
+
         # --- Minimum history guard ---
         if len(self.price_history) < 20:
             logger.warning(f"Not enough price history ({len(self.price_history)}/20)")
@@ -1100,34 +1113,33 @@ class IntegratedBTCStrategy(Strategy):
                 return
             await self._place_real_order(fused, POSITION_SIZE_USD, current_price, direction)
             
-    async def _record_paper_trade(self, signal, position_size, current_price, direction, is_live=False):
+    async def _record_paper_trade(self, signal, position_size, current_price, direction, is_live=False, token_id="", market_id=""):
         exit_delta = timedelta(minutes=1) if self.test_mode else timedelta(minutes=15)
         exit_time = datetime.now(timezone.utc) + exit_delta
 
-        # Polymarket Binary Resolution Simulation
-        # If we buy LONG (YES), our win probability is the current YES price.
-        # If we buy SHORT (NO), our win probability is (1 - current YES price).
         price_float = float(current_price)
-        win_probability = price_float if direction == "long" else (1.0 - price_float)
-
-        # We roll the dice based on the actual market probability
-        is_win = random.random() < win_probability
-
-        # Calculate PnL based on $1.00 position size
-        # Shares bought = Size / Price
         entry_price_side = price_float if direction == "long" else (1.0 - price_float)
         shares = float(position_size) / entry_price_side
 
-        if is_win:
-            # Win: shares resolve to $1.00 each
-            pnl = (shares * 1.0) - float(position_size)
-            outcome = "WIN"
-            exit_price_log = 1.00 if direction == "long" else 0.00
+        if is_live:
+            # LIVE (dinheiro real): NAO adivinha o resultado. Grava PENDENTE; o
+            # resultado real e lido depois que o mercado de 15 min fecha, via
+            # _resolve_pending_live_trades (le o last-trade-price do token).
+            outcome = "PENDING"
+            pnl = 0.0
+            exit_price_log = price_float
         else:
-            # Loss: shares resolve to $0.00
-            pnl = -float(position_size)
-            outcome = "LOSS"
-            exit_price_log = 0.00 if direction == "long" else 1.00
+            # SIMULACAO: sorteia o resultado pela probabilidade do mercado (paper trading).
+            win_probability = price_float if direction == "long" else (1.0 - price_float)
+            is_win = random.random() < win_probability
+            if is_win:
+                pnl = (shares * 1.0) - float(position_size)
+                outcome = "WIN"
+                exit_price_log = 1.00 if direction == "long" else 0.00
+            else:
+                pnl = -float(position_size)
+                outcome = "LOSS"
+                exit_price_log = 0.00 if direction == "long" else 1.00
 
         exit_price = Decimal(str(exit_price_log))
         paper_trade = PaperTrade(
@@ -1138,7 +1150,10 @@ class IntegratedBTCStrategy(Strategy):
             signal_score=signal.score,
             signal_confidence=signal.confidence,
             outcome=outcome,
-            trade_type="LIVE" if is_live else "SIM"
+            trade_type="LIVE" if is_live else "SIM",
+            token_id=token_id,
+            market_id=market_id,
+            pnl_usd=pnl,
         )
         self.paper_trades.append(paper_trade)
 
@@ -1159,7 +1174,9 @@ class IntegratedBTCStrategy(Strategy):
             }
         )
 
-        if hasattr(self, 'grafana_exporter') and self.grafana_exporter:
+        # Em LIVE o resultado ainda e desconhecido (PENDENTE) — o contador do Grafana
+        # so e atualizado na resolucao real (ver _resolve_pending_live_trades).
+        if not is_live and hasattr(self, 'grafana_exporter') and self.grafana_exporter:
             self.grafana_exporter.increment_trade_counter(won=(pnl > 0))
             self.grafana_exporter.record_trade_duration(exit_delta.total_seconds())
 
@@ -1206,7 +1223,10 @@ class IntegratedBTCStrategy(Strategy):
                         signal_score=float(t.get('signal_score', 0.0)),
                         signal_confidence=float(t.get('signal_confidence', 0.0)),
                         outcome=t.get('outcome', 'PENDING'),
-                        trade_type=t.get('trade_type', 'SIM')
+                        trade_type=t.get('trade_type', 'SIM'),
+                        token_id=t.get('token_id', ''),
+                        market_id=t.get('market_id', ''),
+                        pnl_usd=float(t.get('pnl_usd', 0.0)),
                     )
                     self.paper_trades.append(pt)
         except Exception as e:
@@ -1288,6 +1308,76 @@ class IntegratedBTCStrategy(Strategy):
         if cash is not None and cash < floor:
             return False, f"Caixa ${cash:.2f} abaixo do piso de ${floor:.2f}"
         return True, None
+
+    # ------------------------------------------------------------------
+    # Resolucao REAL de trades LIVE (le o resultado do mercado, nao adivinha)
+    # ------------------------------------------------------------------
+
+    def _get_clob_reader(self):
+        """ClobClient publico (somente leitura de precos), cacheado."""
+        client = getattr(self, '_clob_reader', None)
+        if client is None:
+            try:
+                from py_clob_client.client import ClobClient
+                client = ClobClient("https://clob.polymarket.com", chain_id=137)
+                self._clob_reader = client
+            except Exception as e:
+                logger.warning(f"Nao consegui criar ClobClient de leitura: {e}")
+                self._clob_reader = None
+        return self._clob_reader
+
+    def _resolve_pending_live_trades(self):
+        """Le o resultado REAL de trades LIVE pendentes cujo mercado de 15 min ja
+        fechou e atualiza WIN/LOSS + PnL. Fonte: last-trade-price do token comprado
+        (>= 0.9 = ganhou, <= 0.1 = perdeu). Substitui o antigo 'sorteio' aleatorio."""
+        pendentes = [
+            t for t in self.paper_trades
+            if getattr(t, 'trade_type', 'SIM') == 'LIVE'
+            and getattr(t, 'outcome', '') == 'PENDING'
+            and getattr(t, 'token_id', '')
+        ]
+        if not pendentes:
+            return
+        reader = self._get_clob_reader()
+        if reader is None:
+            return
+        now = datetime.now(timezone.utc)
+        mudou = False
+        for t in pendentes:
+            idade_min = (now - t.timestamp).total_seconds() / 60.0
+            if idade_min < 16:  # espera o mercado de 15 min fechar (+ folga)
+                continue
+            try:
+                res = reader.get_last_trade_price(t.token_id)
+                price = float(res.get('price')) if isinstance(res, dict) else float(res)
+            except Exception as e:
+                logger.warning(f"Resolver: falha lendo preco (token {t.token_id[:10]}...): {str(e)[:70]}")
+                if idade_min > 360:  # >6h sem preco -> desiste, marca desconhecido
+                    t.outcome = "UNKNOWN"; mudou = True
+                continue
+            # entry_side = quanto pagamos por cota do token comprado
+            is_long = t.direction.upper() in ("LONG", "YES", "UP")
+            entry_side = t.price if is_long else (1.0 - t.price)
+            entry_side = entry_side if entry_side > 0 else 0.01
+            if price >= 0.9:
+                shares = t.size_usd / entry_side
+                t.outcome = "WIN"; t.pnl_usd = round(shares - t.size_usd, 2); mudou = True
+            elif price <= 0.1:
+                t.outcome = "LOSS"; t.pnl_usd = round(-t.size_usd, 2); mudou = True
+            elif idade_min > 360:
+                t.outcome = "UNKNOWN"; mudou = True
+            if t.outcome != "PENDING":
+                logger.info(
+                    f"✅ Trade LIVE resolvido: {t.direction} ${t.size_usd:.2f} → "
+                    f"{t.outcome} (preco final {price:.3f}, PnL ${t.pnl_usd:+.2f})"
+                )
+                if getattr(self, 'grafana_exporter', None) and t.outcome in ("WIN", "LOSS"):
+                    try:
+                        self.grafana_exporter.increment_trade_counter(won=(t.outcome == "WIN"))
+                    except Exception:
+                        pass
+        if mudou:
+            self._save_paper_trades()
 
     # ------------------------------------------------------------------
     # Real order (unchanged)
@@ -1413,7 +1503,10 @@ class IntegratedBTCStrategy(Strategy):
             logger.info("=" * 80)
 
             self._track_order_event("placed")
-            await self._record_paper_trade(signal, position_size, current_price, direction, is_live=True)
+            await self._record_paper_trade(
+                signal, position_size, current_price, direction, is_live=True,
+                token_id=token_hash, market_id=str(trade_instrument_id.value),
+            )
 
         except Exception as e:
             logger.error(f"Error placing real order: {e}")
