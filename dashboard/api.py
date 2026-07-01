@@ -142,10 +142,36 @@ async def get_settings(username: str = Depends(get_current_user)):
 
 @app.post("/api/settings")
 async def save_settings(data: SettingsData, username: str = Depends(get_current_user)):
+    new_data = data.model_dump()
+
+    # Carrega o que já está salvo para poder preservar segredos mascarados.
     if redis_client:
-        redis_client.set('btc_trading:credentials', json.dumps(data.model_dump()))
+        existing_json = redis_client.get('btc_trading:credentials')
     else:
-        MOCK_REDIS['btc_trading:credentials'] = json.dumps(data.model_dump())
+        existing_json = MOCK_REDIS.get('btc_trading:credentials')
+    existing = json.loads(existing_json) if existing_json else {}
+
+    # PROTEÇÃO: o GET devolve os segredos mascarados ("***"). Se o usuário salvar
+    # o painel sem redigitar, esses "***" voltam aqui e sobrescreveriam as chaves
+    # reais no Redis (quebrando a autenticação do bot). Então, quando o campo vier
+    # mascarado ou vazio, mantemos o valor que já estava salvo.
+    secret_fields = ("api_secret", "api_passphrase", "private_key")
+    for field in secret_fields:
+        value = (new_data.get(field) or "").strip()
+        if value in ("", "***"):
+            new_data[field] = existing.get(field, "")
+
+    # PROTEÇÃO: a Polymarket rejeita silenciosamente ordens abaixo de $5.00.
+    try:
+        if float(new_data.get("trade_size", 0)) < 5.0:
+            new_data["trade_size"] = 5.0
+    except (TypeError, ValueError):
+        new_data["trade_size"] = 5.0
+
+    if redis_client:
+        redis_client.set('btc_trading:credentials', json.dumps(new_data))
+    else:
+        MOCK_REDIS['btc_trading:credentials'] = json.dumps(new_data)
     return {"status": "success"}
 
 # --- Trading Mode Logic ---

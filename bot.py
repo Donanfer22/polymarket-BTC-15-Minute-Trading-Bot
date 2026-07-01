@@ -967,7 +967,7 @@ class IntegratedBTCStrategy(Strategy):
         # --- Phase 5: Position size is configurable via Dashboard (Redis) ---
         import os
         import json
-        trade_size_val = os.getenv("MARKET_BUY_USD", "1.00")
+        trade_size_val = os.getenv("MARKET_BUY_USD", "5.00")
         if getattr(self, 'redis_client', None):
             try:
                 cred_json = self.redis_client.get('btc_trading:credentials')
@@ -1031,7 +1031,9 @@ class IntegratedBTCStrategy(Strategy):
 
         # --- Position Sizing ---
         # ALL profiles now strictly respect the dashboard value to ensure live trading safety
-        POSITION_SIZE_USD = Decimal(trade_size_val)
+        # TRAVA: a Polymarket rejeita silenciosamente ordens abaixo de $5.00,
+        # então nunca deixamos o tamanho da entrada cair abaixo do mínimo.
+        POSITION_SIZE_USD = max(Decimal(trade_size_val), Decimal("5.00"))
         if strategy_profile == "snowball":
             logger.info(f"  [Snowball] Usando entrada fixa do Dashboard: ${float(POSITION_SIZE_USD):.2f}")
         
