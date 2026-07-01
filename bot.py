@@ -1074,6 +1074,11 @@ class IntegratedBTCStrategy(Strategy):
         if is_simulation:
             await self._record_paper_trade(fused, POSITION_SIZE_USD, current_price, direction, is_live=False)
         else:
+            # Travas de risco LIVE (dinheiro real): teto diario de entradas + piso de caixa.
+            guard_ok, guard_reason = self._check_live_trade_guards()
+            if not guard_ok:
+                logger.warning(f"🛡 Trava de risco LIVE: {guard_reason} — entrada BLOQUEADA")
+                return
             await self._place_real_order(fused, POSITION_SIZE_USD, current_price, direction)
             
     async def _record_paper_trade(self, signal, position_size, current_price, direction, is_live=False):
@@ -1189,6 +1194,77 @@ class IntegratedBTCStrategy(Strategy):
             logger.warning(f"Failed to load previous paper trades: {e}")
 
     # ------------------------------------------------------------------
+    # Travas de risco LIVE (dinheiro real)
+    # ------------------------------------------------------------------
+
+    def _daily_live_key(self) -> str:
+        """Chave Redis do contador de entradas LIVE do dia (UTC)."""
+        return f"btc_trading:live_count:{datetime.now(timezone.utc).strftime('%Y-%m-%d')}"
+
+    def _get_daily_live_count(self) -> int:
+        """Quantas entradas LIVE ja foram feitas hoje (persistido no Redis, sobrevive a restart)."""
+        if not getattr(self, 'redis_client', None):
+            return 0
+        try:
+            v = self.redis_client.get(self._daily_live_key())
+            return int(v) if v else 0
+        except Exception as e:
+            logger.warning(f"Falha ao ler contador diario de entradas LIVE: {e}")
+            return 0
+
+    def _increment_daily_live_count(self) -> None:
+        """Incrementa o contador diario apos uma ordem LIVE enviada com sucesso."""
+        if not getattr(self, 'redis_client', None):
+            return
+        try:
+            key = self._daily_live_key()
+            n = self.redis_client.incr(key)
+            self.redis_client.expire(key, 172800)  # expira em 2 dias
+            logger.info(f"📊 Entradas LIVE hoje: {n}")
+        except Exception as e:
+            logger.warning(f"Falha ao incrementar contador diario de entradas LIVE: {e}")
+
+    def _get_available_cash_usd(self):
+        """Le o Caixa real (saldo pUSD do funder) on-chain. Retorna float ou None (fail-open)."""
+        import os
+        funder = os.getenv("POLYMARKET_FUNDER", "")
+        if not funder:
+            return None
+        try:
+            from web3 import Web3
+            rpc = os.getenv("POLYGON_RPC", "https://polygon-bor-rpc.publicnode.com")
+            w3 = Web3(Web3.HTTPProvider(rpc, request_kwargs={"timeout": 8}))
+            pusd = Web3.to_checksum_address("0xC011a7E12a19f7B1f670d46F03B03f3342E82DFB")
+            abi = [{"constant": True, "inputs": [{"name": "o", "type": "address"}],
+                    "name": "balanceOf", "outputs": [{"name": "", "type": "uint256"}],
+                    "type": "function"}]
+            c = w3.eth.contract(address=pusd, abi=abi)
+            bal = c.functions.balanceOf(Web3.to_checksum_address(funder)).call()
+            return bal / 1e6
+        except Exception as e:
+            # fail-open: se nao conseguir ler, nao bloqueia (o teto diario ja limita a exposicao)
+            logger.warning(f"Falha ao ler Caixa on-chain (fail-open, nao bloqueia): {e}")
+            return None
+
+    def _check_live_trade_guards(self):
+        """Trava de risco para operacoes LIVE. Retorna (ok: bool, motivo: str|None)."""
+        import os
+        # 1. Teto diario de entradas -> limita a perda maxima do dia (N x $5)
+        max_per_day = int(os.getenv("MAX_LIVE_TRADES_PER_DAY", "3"))
+        count = self._get_daily_live_count()
+        if count >= max_per_day:
+            return False, (
+                f"teto diario de {max_per_day} entradas atingido "
+                f"(hoje: {count}) — perda maxima do dia protegida"
+            )
+        # 2. Piso de caixa -> nunca zerar a conta
+        floor = float(os.getenv("CASH_FLOOR_USD", "10"))
+        cash = self._get_available_cash_usd()
+        if cash is not None and cash < floor:
+            return False, f"Caixa ${cash:.2f} abaixo do piso de ${floor:.2f}"
+        return True, None
+
+    # ------------------------------------------------------------------
     # Real order (unchanged)
     # ------------------------------------------------------------------
 
@@ -1297,6 +1373,8 @@ class IntegratedBTCStrategy(Strategy):
             if getattr(resp, "ok", False) or hasattr(resp, "order_id"):
                 logger.info(f"ORDEM ENVIADA: {getattr(resp, 'order_id', 'N/A')}")
                 unique_id = getattr(resp, "order_id", unique_id)
+                # Conta a entrada no teto diario SO apos sucesso real
+                self._increment_daily_live_count()
             else:
                 logger.error(f"Ordem rejeitada: {getattr(resp, 'code', 'N/A')} — {getattr(resp, 'message', str(resp))}")
 
