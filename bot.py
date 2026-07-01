@@ -1264,9 +1264,10 @@ class IntegratedBTCStrategy(Strategy):
             logger.warning(f"Falha ao incrementar contador diario de entradas LIVE: {e}")
 
     def _get_available_cash_usd(self, max_age_s: float = 60.0):
-        """Le o Caixa real (saldo pUSD do funder) on-chain, com cache curto.
-        Retorna float ou None (fail-open). O cache evita spam de RPC (test-mode
-        opera a cada minuto e a leitura e usada por 2 travas + sizing)."""
+        """Le o Caixa real (saldo pUSD do funder) via JSON-RPC puro (urllib, sem
+        dependencia nova de web3), com cache curto. Retorna float ou None (fail-open).
+        O cache evita spam de RPC (test-mode opera a cada minuto e a leitura e usada
+        por 2 travas + o sizing do snowball)."""
         import os, time
         cached = getattr(self, '_cash_cache', None)
         if cached and (time.time() - cached[1]) < max_age_s:
@@ -1275,15 +1276,23 @@ class IntegratedBTCStrategy(Strategy):
         if not funder:
             return None
         try:
-            from web3 import Web3
+            import json as _json, urllib.request
             rpc = os.getenv("POLYGON_RPC", "https://polygon-bor-rpc.publicnode.com")
-            w3 = Web3(Web3.HTTPProvider(rpc, request_kwargs={"timeout": 8}))
-            pusd = Web3.to_checksum_address("0xC011a7E12a19f7B1f670d46F03B03f3342E82DFB")
-            abi = [{"constant": True, "inputs": [{"name": "o", "type": "address"}],
-                    "name": "balanceOf", "outputs": [{"name": "", "type": "uint256"}],
-                    "type": "function"}]
-            c = w3.eth.contract(address=pusd, abi=abi)
-            bal = c.functions.balanceOf(Web3.to_checksum_address(funder)).call() / 1e6
+            pusd = "0xC011a7E12a19f7B1f670d46F03B03f3342E82DFB"  # colateral pUSD
+            addr = funder.lower().replace("0x", "").rjust(64, "0")
+            data = "0x70a08231" + addr  # selector de balanceOf(address)
+            payload = {"jsonrpc": "2.0", "id": 1, "method": "eth_call",
+                       "params": [{"to": pusd, "data": data}, "latest"]}
+            req = urllib.request.Request(
+                rpc, data=_json.dumps(payload).encode(),
+                headers={"Content-Type": "application/json", "User-Agent": "btc-bot/1.0"},
+            )
+            with urllib.request.urlopen(req, timeout=8) as r:
+                out = _json.loads(r.read().decode())
+            raw = out.get("result")
+            if not raw or raw == "0x":
+                return None
+            bal = int(raw, 16) / 1e6  # pUSD tem 6 casas
             self._cash_cache = (bal, time.time())
             return bal
         except Exception as e:
