@@ -1042,6 +1042,26 @@ class IntegratedBTCStrategy(Strategy):
         if not direction:
             return
 
+        # --- Filtro de EDGE (qualidade da entrada / risco-retorno) ---
+        # Preco do token que vamos comprar (o que pagamos por cota):
+        #   long (YES) = price_float ; short (NO) = 1 - price_float
+        # Se estiver caro demais (favorito ja decidido) o lucro possivel e minusculo
+        # e uma unica derrota apaga dezenas de vitorias (ex: comprar a $0.975 = arriscar
+        # $5 p/ ganhar ~$0.13). Se estiver barato demais, e um azarao de baixa chance.
+        # Só operamos na faixa saudavel [MIN_ENTRY_PRICE, MAX_ENTRY_PRICE].
+        import os as _os_edge
+        entry_side_price = price_float if direction == "long" else (1.0 - price_float)
+        min_entry = float(_os_edge.getenv("MIN_ENTRY_PRICE", "0.15"))
+        max_entry = float(_os_edge.getenv("MAX_ENTRY_PRICE", "0.85"))
+        if not (min_entry <= entry_side_price <= max_entry):
+            motivo = "favorito caro demais (lucro minusculo)" if entry_side_price > max_entry \
+                else "azarao de chance baixa demais"
+            logger.info(
+                f"  🚫 Filtro de edge: entrada a ${entry_side_price:.3f} fora da faixa "
+                f"[${min_entry:.2f}–${max_entry:.2f}] — {motivo}. PULANDO (risco/retorno ruim)."
+            )
+            return
+
         # --- Position Sizing ---
         # ALL profiles now strictly respect the dashboard value to ensure live trading safety
         # TRAVA: a Polymarket rejeita silenciosamente ordens abaixo de $5.00,
