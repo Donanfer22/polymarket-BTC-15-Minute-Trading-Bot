@@ -1428,6 +1428,52 @@ class IntegratedBTCStrategy(Strategy):
     # Real order (unchanged)
     # ------------------------------------------------------------------
 
+    def _extract_filled_usd(self, resp, intended_usd):
+        """Extrai o USD realmente gasto (fill real) da resposta da ordem.
+
+        Numa COMPRA, makingAmount = USDC gasto. O wrapper polymarket-client pode
+        normalizar com nomes/locais diferentes, entao testamos varios. Checagem de
+        sanidade: o USD gasto nunca excede o pretendido, enquanto as cotas
+        (takingAmount) sempre excedem (cota < $1) — isso filtra e evita confundir
+        making/taking mesmo sem conhecer a estrutura exata. Retorna float ou None.
+        """
+        candidates = (
+            "making_amount", "makingAmount", "maker_amount", "makerAmount",
+            "filled_amount", "filledAmount", "matched_amount", "matchedAmount",
+            "size_matched", "sizeMatched", "amount_filled", "amountFilled",
+        )
+        tol = float(intended_usd) * 1.02  # tolerancia p/ arredondamento
+
+        def _valid(v):
+            try:
+                f = float(v)
+            except (TypeError, ValueError):
+                return None
+            return f if 0 < f <= tol else None
+
+        # 1. atributos diretos no objeto resp
+        for name in candidates:
+            r = _valid(getattr(resp, name, None))
+            if r is not None:
+                return r
+        # 2. dicts aninhados comuns
+        for holder in ("raw", "data", "response", "result", "__dict__"):
+            d = getattr(resp, holder, None)
+            if isinstance(d, dict):
+                for name in candidates:
+                    if name in d:
+                        r = _valid(d[name])
+                        if r is not None:
+                            return r
+        # 3. o proprio resp e um dict
+        if isinstance(resp, dict):
+            for name in candidates:
+                if name in resp:
+                    r = _valid(resp[name])
+                    if r is not None:
+                        return r
+        return None
+
     async def _place_real_order(self, signal, position_size, current_price, direction):
         if not self.instrument_id:
             logger.error("No instrument available")
@@ -1530,9 +1576,28 @@ class IntegratedBTCStrategy(Strategy):
                     return response
 
             resp = await _place_order()
+            filled_usd = None  # USD realmente preenchido (fill real); None = desconhecido
             if getattr(resp, "ok", False) or hasattr(resp, "order_id"):
                 logger.info(f"ORDEM ENVIADA: {getattr(resp, 'order_id', 'N/A')}")
                 unique_id = getattr(resp, "order_id", unique_id)
+                # DIAGNOSTICO: dump cru da resposta pra aprender a estrutura do SDK
+                # (o polymarket-client so roda no container; assim vemos os campos reais).
+                try:
+                    _raw = getattr(resp, "__dict__", None) or resp
+                    logger.info(f"  [resp cru] {_raw!r}")
+                except Exception:
+                    pass
+                # FILL REAL: numa compra o USD gasto = makingAmount. Extrai com
+                # checagem de sanidade (USD sempre <= pretendido; cotas sempre >
+                # pretendido pois cota < $1) — assim nunca confunde making/taking.
+                filled_usd = self._extract_filled_usd(resp, max_usd_amount)
+                if filled_usd is not None:
+                    logger.info(f"  💵 Fill REAL: ${filled_usd:.4f} (pretendido ${max_usd_amount:.2f})")
+                else:
+                    logger.warning(
+                        f"  ⚠ Nao consegui ler o fill real do resp — gravando o pretendido "
+                        f"${max_usd_amount:.2f} (PnL pode inflar em fill parcial; ver [resp cru] acima)"
+                    )
                 # Conta a entrada no teto diario SO apos sucesso real
                 self._increment_daily_live_count()
             else:
@@ -1548,8 +1613,10 @@ class IntegratedBTCStrategy(Strategy):
             logger.info("=" * 80)
 
             self._track_order_event("placed")
+            # Grava o FILL REAL quando conhecido (senao o pretendido, como antes).
+            recorded_size = Decimal(str(filled_usd)) if filled_usd is not None else position_size
             await self._record_paper_trade(
-                signal, position_size, current_price, direction, is_live=True,
+                signal, recorded_size, current_price, direction, is_live=True,
                 token_id=token_hash, market_id=str(trade_instrument_id.value),
             )
 
