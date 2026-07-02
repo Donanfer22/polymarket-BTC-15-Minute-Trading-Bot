@@ -1324,7 +1324,7 @@ class IntegratedBTCStrategy(Strategy):
         """Trava de risco para operacoes LIVE. Retorna (ok: bool, motivo: str|None)."""
         import os
         # 1. Teto diario de entradas -> limita a perda maxima do dia (N x $5)
-        max_per_day = int(os.getenv("MAX_LIVE_TRADES_PER_DAY", "3"))
+        max_per_day = int(os.getenv("MAX_LIVE_TRADES_PER_DAY", "7"))
         count = self._get_daily_live_count()
         if count >= max_per_day:
             return False, (
