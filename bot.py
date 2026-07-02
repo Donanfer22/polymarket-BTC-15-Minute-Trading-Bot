@@ -1010,7 +1010,13 @@ class IntegratedBTCStrategy(Strategy):
             MIN_SNIPER_SCORE = 60.0
             logger.info("  [Profile: Sniper Antecipado ativado]")
             if fused.confidence > 0.70 and fused.score >= MIN_SNIPER_SCORE:
-                direction = fused.direction.value.lower()
+                # BUGFIX: fused.direction.value e "bullish"/"bearish", mas todo o
+                # resto do codigo (edge filter, _place_real_order, _record_paper_trade)
+                # decide YES/NO checando `direction == "long"`. Como "bullish" nunca
+                # e "long", um sinal BULLISH caia no else e comprava NO (DOWN) — o
+                # OPOSTO do sinal. Traduzir para "long"/"short" (igual snowball/reversal).
+                sig = fused.direction.value.lower()
+                direction = "long" if sig in ("bullish", "long", "up", "yes") else "short"
                 trend_confidence = fused.confidence
                 logger.info(f" TREND: Sniper confiante no sinal {direction.upper()} ({fused.confidence:.2%}, score {fused.score:.1f})")
             elif fused.confidence > 0.70:
