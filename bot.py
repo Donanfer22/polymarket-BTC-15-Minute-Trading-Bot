@@ -999,15 +999,22 @@ class IntegratedBTCStrategy(Strategy):
         trend_confidence = 0.0
 
         if strategy_profile == "sniper":
-            # Early Sniper (Minute 8): Trust fused signal if confidence > 70%
-            # (baixado de 75% -> 70%: o sinal de "medo extremo" costuma capar a
-            #  confianca em ~74%, entao 75% quase nunca era atingido. Filtro de
-            #  edge + teto diario seguem protegendo. Experimento monitorado.)
+            # Early Sniper (Minute 8): confia no sinal fundido se DUAS condicoes baterem:
+            #   1. confianca > 70% (baixado de 75%: o sinal de "medo extremo" costuma
+            #      capar a confianca em ~74%, entao 75% quase nunca era atingido).
+            #   2. score >= 60 (PISO DE CONVICCAO): o score mede o quao lopsided esta
+            #      a votacao (50 = empate, 100 = consenso). Sem esse piso, um sinal
+            #      quase-empatado (ex: score 52, votos 0.276 vs 0.299) com confianca
+            #      71% virava ordem real = cara-ou-coroa disfarcado. Corta esses.
+            #   Filtro de edge + teto diario seguem protegendo. Experimento monitorado.
+            MIN_SNIPER_SCORE = 60.0
             logger.info("  [Profile: Sniper Antecipado ativado]")
-            if fused.confidence > 0.70:
+            if fused.confidence > 0.70 and fused.score >= MIN_SNIPER_SCORE:
                 direction = fused.direction.value.lower()
                 trend_confidence = fused.confidence
-                logger.info(f" TREND: Sniper confiante no sinal {direction.upper()} ({fused.confidence:.2%})")
+                logger.info(f" TREND: Sniper confiante no sinal {direction.upper()} ({fused.confidence:.2%}, score {fused.score:.1f})")
+            elif fused.confidence > 0.70:
+                logger.info(f" TREND: Sniper ignorou sinal — confiança OK ({fused.confidence:.2%}) mas score {fused.score:.1f} < {MIN_SNIPER_SCORE:.0f} (quase empate, sem convicção)")
             else:
                 logger.info(f" TREND: Sniper ignorou sinal (confiança {fused.confidence:.2%} < 70%)")
 
