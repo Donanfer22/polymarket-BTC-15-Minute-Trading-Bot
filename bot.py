@@ -1016,9 +1016,23 @@ class IntegratedBTCStrategy(Strategy):
                 # e "long", um sinal BULLISH caia no else e comprava NO (DOWN) — o
                 # OPOSTO do sinal. Traduzir para "long"/"short" (igual snowball/reversal).
                 sig = fused.direction.value.lower()
-                direction = "long" if sig in ("bullish", "long", "up", "yes") else "short"
-                trend_confidence = fused.confidence
-                logger.info(f" TREND: Sniper confiante no sinal {direction.upper()} ({fused.confidence:.2%}, score {fused.score:.1f})")
+                _dir = "long" if sig in ("bullish", "long", "up", "yes") else "short"
+                # FILTRO DE DIRECAO (anti-fade): nao apostar CONTRA uma tendencia ja
+                # forte. Dados de 02/07 (noite -$3): as contrarias DOWN vs mercado
+                # forte pra cima perderam (03:08 -$5, 06:38 -$4); os favoritos (a
+                # favor da tendencia) ganharam. Fadar um mercado ja ~decidido e ainda
+                # se movendo contra = risco/retorno pessimo. So opera a favor do
+                # favorito. Corte 0.60 = mesmo limiar de "tendencia clara" do snowball.
+                NO_FADE_HI = 0.60   # nao SHORT (DOWN) acima disso (mercado forte UP)
+                NO_FADE_LO = 0.40   # nao LONG (UP) abaixo disso (mercado forte DOWN)
+                if _dir == "short" and price_float > NO_FADE_HI:
+                    logger.info(f" TREND: Sniper PULOU SHORT — mercado forte pra CIMA ({price_float:.2%} > {NO_FADE_HI:.0%}); nao fadar tendencia (anti-fade)")
+                elif _dir == "long" and price_float < NO_FADE_LO:
+                    logger.info(f" TREND: Sniper PULOU LONG — mercado forte pra BAIXO ({price_float:.2%} < {NO_FADE_LO:.0%}); nao fadar tendencia (anti-fade)")
+                else:
+                    direction = _dir
+                    trend_confidence = fused.confidence
+                    logger.info(f" TREND: Sniper confiante no sinal {direction.upper()} ({fused.confidence:.2%}, score {fused.score:.1f})")
             elif fused.confidence > 0.70:
                 logger.info(f" TREND: Sniper ignorou sinal — confiança OK ({fused.confidence:.2%}) mas score {fused.score:.1f} < {MIN_SNIPER_SCORE:.0f} (quase empate, sem convicção)")
             else:
