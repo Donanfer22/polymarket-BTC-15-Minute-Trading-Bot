@@ -999,14 +999,17 @@ class IntegratedBTCStrategy(Strategy):
         trend_confidence = 0.0
 
         if strategy_profile == "sniper":
-            # Early Sniper (Minute 8): Trust fused signal if confidence > 75%
+            # Early Sniper (Minute 8): Trust fused signal if confidence > 70%
+            # (baixado de 75% -> 70%: o sinal de "medo extremo" costuma capar a
+            #  confianca em ~74%, entao 75% quase nunca era atingido. Filtro de
+            #  edge + teto diario seguem protegendo. Experimento monitorado.)
             logger.info("  [Profile: Sniper Antecipado ativado]")
-            if fused.confidence > 0.75:
+            if fused.confidence > 0.70:
                 direction = fused.direction.value.lower()
                 trend_confidence = fused.confidence
                 logger.info(f" TREND: Sniper confiante no sinal {direction.upper()} ({fused.confidence:.2%})")
             else:
-                logger.info(f" TREND: Sniper ignorou sinal (confiança {fused.confidence:.2%} < 75%)")
+                logger.info(f" TREND: Sniper ignorou sinal (confiança {fused.confidence:.2%} < 70%)")
 
         elif strategy_profile == "reversal":
             # Reversal Hunter (Minute 3): Look for extremes vs signal
