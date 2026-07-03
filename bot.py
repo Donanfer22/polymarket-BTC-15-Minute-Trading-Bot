@@ -1354,13 +1354,15 @@ class IntegratedBTCStrategy(Strategy):
         """Trava de risco para operacoes LIVE. Retorna (ok: bool, motivo: str|None)."""
         import os
         # 1. Teto diario de entradas -> limita a perda maxima do dia (N x $5)
-        max_per_day = int(os.getenv("MAX_LIVE_TRADES_PER_DAY", "7"))
-        count = self._get_daily_live_count()
-        if count >= max_per_day:
-            return False, (
-                f"teto diario de {max_per_day} entradas atingido "
-                f"(hoje: {count}) — perda maxima do dia protegida"
-            )
+        #    0 = sem limite (fase de coleta de dados; o piso de caixa segue ativo)
+        max_per_day = int(os.getenv("MAX_LIVE_TRADES_PER_DAY", "0"))
+        if max_per_day > 0:
+            count = self._get_daily_live_count()
+            if count >= max_per_day:
+                return False, (
+                    f"teto diario de {max_per_day} entradas atingido "
+                    f"(hoje: {count}) — perda maxima do dia protegida"
+                )
         # 2. Piso de caixa -> nunca zerar a conta
         floor = float(os.getenv("CASH_FLOOR_USD", "10"))
         cash = self._get_available_cash_usd()
