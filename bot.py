@@ -1079,10 +1079,14 @@ class IntegratedBTCStrategy(Strategy):
         # e uma unica derrota apaga dezenas de vitorias (ex: comprar a $0.975 = arriscar
         # $5 p/ ganhar ~$0.13). Se estiver barato demais, e um azarao de baixa chance.
         # Só operamos na faixa saudavel [MIN_ENTRY_PRICE, MAX_ENTRY_PRICE].
+        # Teto 0.60 (era 0.85): a confianca dos sinais e ~70-75%, entao pagar mais de
+        # $0.60/cota e prejuizo estrutural (precisa acertar mais do que o custo p/ lucrar).
+        # A $0.60 o premio minimo e +67% (~+$3.33 por win de $5) — perfil das entradas
+        # vencedoras de 01/07 (cota $0.40 → +$7.50). Ver NOTES.md 2026-07-03.
         import os as _os_edge
         entry_side_price = price_float if direction == "long" else (1.0 - price_float)
         min_entry = float(_os_edge.getenv("MIN_ENTRY_PRICE", "0.15"))
-        max_entry = float(_os_edge.getenv("MAX_ENTRY_PRICE", "0.85"))
+        max_entry = float(_os_edge.getenv("MAX_ENTRY_PRICE", "0.60"))
         if not (min_entry <= entry_side_price <= max_entry):
             motivo = "favorito caro demais (lucro minusculo)" if entry_side_price > max_entry \
                 else "azarao de chance baixa demais"
