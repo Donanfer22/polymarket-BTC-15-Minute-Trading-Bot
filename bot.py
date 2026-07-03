@@ -381,6 +381,9 @@ class IntegratedBTCStrategy(Strategy):
         # =========================================================================
         self.run_in_executor(self._start_timer_loop)
 
+        # Watchdog anti-congelamento (ver congelamento de 03/07 no NOTES.md)
+        self._start_watchdog()
+
         if self.grafana_exporter:
             import threading
             threading.Thread(target=self._start_grafana_sync, daemon=True).start()
@@ -393,6 +396,40 @@ class IntegratedBTCStrategy(Strategy):
         else:
             logger.warning(f"⚠ Need more history ({len(self.price_history)}/20)")
         logger.info("=" * 80)
+
+    def _start_watchdog(self):
+        """Watchdog anti-congelamento: se o bot travar (timer loop morto ou
+        websocket surdo), mata o processo — o Docker (restart: unless-stopped)
+        sobe ele de volta limpo. Nasceu do congelamento de 03/07: processo
+        'Up' porem sem ciclo e sem tick por 47+ min, invisivel pro Docker.
+        """
+        import threading
+        self._wd_last_beat = time.time()
+        self._wd_last_tick = time.time()
+        loop_timeout = int(os.getenv("WATCHDOG_LOOP_TIMEOUT_S", "900"))   # 15 min sem timer loop
+        tick_timeout = int(os.getenv("WATCHDOG_TICK_TIMEOUT_S", "1800"))  # 30 min sem tick de mercado
+
+        def _vigiar():
+            while True:
+                time.sleep(30)
+                agora = time.time()
+                sem_beat = agora - self._wd_last_beat
+                sem_tick = agora - self._wd_last_tick
+                if sem_beat > loop_timeout:
+                    logger.critical(
+                        f"🐶 WATCHDOG: timer loop morto ha {sem_beat:.0f}s (> {loop_timeout}s) "
+                        f"— matando o processo p/ o Docker reiniciar limpo"
+                    )
+                    os._exit(1)
+                if sem_tick > tick_timeout:
+                    logger.critical(
+                        f"🐶 WATCHDOG: nenhum quote tick ha {sem_tick:.0f}s (> {tick_timeout}s) "
+                        f"— websocket surdo? Matando o processo p/ o Docker reiniciar limpo"
+                    )
+                    os._exit(1)
+
+        threading.Thread(target=_vigiar, daemon=True, name="watchdog").start()
+        logger.info(f"🐶 Watchdog ativo (timer loop: {loop_timeout}s | ticks: {tick_timeout}s)")
 
     def _generate_synthetic_history(self, target_count: int = 20, existing_count: int = 0):
         """Generate synthetic price history for testing"""
@@ -621,39 +658,47 @@ class IntegratedBTCStrategy(Strategy):
         Also handles the case where we're waiting for a future market to open.
         """
         while True:
-            await self.check_simulation_mode()
+            # Batimento do watchdog: prova que este loop esta vivo
+            self._wd_last_beat = time.time()
+            try:
+                await self.check_simulation_mode()
 
-            # --- auto-restart check ---
-            uptime_minutes = (datetime.now(timezone.utc) - self.bot_start_time).total_seconds() / 60
-            if uptime_minutes >= self.restart_after_minutes:
-                logger.warning("AUTO-RESTART TIME - Loading fresh filters")
-                import signal as _signal
-                os.kill(os.getpid(), _signal.SIGTERM)
-                return
+                # --- auto-restart check ---
+                uptime_minutes = (datetime.now(timezone.utc) - self.bot_start_time).total_seconds() / 60
+                if uptime_minutes >= self.restart_after_minutes:
+                    logger.warning("AUTO-RESTART TIME - Loading fresh filters")
+                    import signal as _signal
+                    os.kill(os.getpid(), _signal.SIGTERM)
+                    return
 
-            now = datetime.now(timezone.utc)
+                now = datetime.now(timezone.utc)
 
-            if self.next_switch_time and now >= self.next_switch_time:
-                if self._waiting_for_market_open:
-                    # The future market we were waiting for has now opened
-                    # Treat it like a market switch so trade timer resets
-                    logger.info("=" * 80)
-                    logger.info(f"⏰ WAITING MARKET NOW OPEN: {now.strftime('%H:%M:%S')} UTC")
-                    logger.info("=" * 80)
-                    # Update next_switch_time to the market's END time
-                    if (self.current_instrument_index >= 0 and
-                            self.current_instrument_index < len(self.all_btc_instruments)):
-                        current_market = self.all_btc_instruments[self.current_instrument_index]
-                        self.next_switch_time = current_market['end_time']
-                        logger.info(f"  Market ends at {self.next_switch_time.strftime('%H:%M:%S')} UTC")
-                    self._waiting_for_market_open = False
-                    self._market_stable = True
-                    self._stable_tick_count = QUOTE_STABILITY_REQUIRED
-                    self.last_trade_time = -1  # Trade immediately on next tick
-                    logger.info("  ✓ MARKET OPEN — ready to trade on next tick")
-                else:
-                    # Normal market switch
-                    self._switch_to_next_market()
+                if self.next_switch_time and now >= self.next_switch_time:
+                    if self._waiting_for_market_open:
+                        # The future market we were waiting for has now opened
+                        # Treat it like a market switch so trade timer resets
+                        logger.info("=" * 80)
+                        logger.info(f"⏰ WAITING MARKET NOW OPEN: {now.strftime('%H:%M:%S')} UTC")
+                        logger.info("=" * 80)
+                        # Update next_switch_time to the market's END time
+                        if (self.current_instrument_index >= 0 and
+                                self.current_instrument_index < len(self.all_btc_instruments)):
+                            current_market = self.all_btc_instruments[self.current_instrument_index]
+                            self.next_switch_time = current_market['end_time']
+                            logger.info(f"  Market ends at {self.next_switch_time.strftime('%H:%M:%S')} UTC")
+                        self._waiting_for_market_open = False
+                        self._market_stable = True
+                        self._stable_tick_count = QUOTE_STABILITY_REQUIRED
+                        self.last_trade_time = -1  # Trade immediately on next tick
+                        logger.info("  ✓ MARKET OPEN — ready to trade on next tick")
+                    else:
+                        # Normal market switch
+                        self._switch_to_next_market()
+            except Exception as e:
+                # Um erro isolado (ex: Redis piscou) NAO pode matar este loop:
+                # sem ele o bot fica surdo p/ sempre (sem troca de mercado e sem
+                # auto-restart) — foi o congelamento de 03/07. Loga e segue vivo.
+                logger.error(f"Erro no timer loop (seguindo vivo): {e}")
 
             await asyncio.sleep(10)
 
@@ -664,6 +709,9 @@ class IntegratedBTCStrategy(Strategy):
     def on_quote_tick(self, tick: QuoteTick):
         """Handle quote tick - TRADE when market opens and at each 15-min boundary"""
         try:
+            # Batimento do watchdog: qualquer tick prova que o feed esta vivo
+            self._wd_last_tick = time.time()
+
             # Check for STOPPED mode without blocking
             if getattr(self, 'redis_paused', False):
                 return
