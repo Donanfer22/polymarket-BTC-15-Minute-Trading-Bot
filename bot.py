@@ -1213,7 +1213,7 @@ class IntegratedBTCStrategy(Strategy):
             if not guard_ok:
                 logger.warning(f"🛡 Trava de risco LIVE: {guard_reason} — entrada BLOQUEADA")
                 return
-            await self._place_real_order(fused, POSITION_SIZE_USD, current_price, direction)
+            await self._place_real_order(fused, POSITION_SIZE_USD, current_price, direction, profile=strategy_profile)
             
     async def _record_paper_trade(self, signal, position_size, current_price, direction, is_live=False, token_id="", market_id=""):
         exit_delta = timedelta(minutes=1) if self.test_mode else timedelta(minutes=15)
@@ -1542,7 +1542,7 @@ class IntegratedBTCStrategy(Strategy):
                         return r
         return None
 
-    async def _place_real_order(self, signal, position_size, current_price, direction):
+    async def _place_real_order(self, signal, position_size, current_price, direction, profile=None):
         if not self.instrument_id:
             logger.error("No instrument available")
             return
@@ -1617,6 +1617,40 @@ class IntegratedBTCStrategy(Strategy):
             # uma Builder/Relayer API Key, quebrando com UserInputError. Ver Issue #70.
             funder = os.getenv("POLYMARKET_FUNDER", "") or None
             token_hash = str(trade_instrument_id.value).split("-")[1].split(".")[0]
+
+            # 🔒 RE-CHECAGEM DE PREÇO FRESCO (anti-slippage). Os filtros de edge e
+            # anti-fade rodam sobre o tick da DECISÃO; num book fino o preço pode
+            # correr até o envio e a ordem FAK preencher fora da faixa aprovada
+            # (caso real 03/07: decisão passou nos filtros, fill DOWN a $0.356 =
+            # mercado 64.4% UP, que o anti-fade bloquearia — ver NOTES.md).
+            # Aqui relemos o melhor ask do token que vamos comprar (o que a FAK
+            # vai pagar de fato) e re-aplicamos as mesmas faixas. Fail-open: se a
+            # leitura falhar, segue com a checagem da decisão (já feita).
+            fresh_price = None
+            try:
+                reader = self._get_clob_reader()
+                if reader is not None:
+                    res = reader.get_price(token_hash, side="BUY")
+                    fresh_price = float(res.get("price")) if isinstance(res, dict) else float(res)
+            except Exception as e:
+                logger.warning(f"  ⚠ Re-checagem de preço fresco falhou (fail-open): {str(e)[:80]}")
+            if fresh_price is not None and 0.0 < fresh_price < 1.0:
+                min_entry = float(os.getenv("MIN_ENTRY_PRICE", "0.15"))
+                max_entry = float(os.getenv("MAX_ENTRY_PRICE", "0.60"))
+                if profile == "sniper":
+                    # Anti-fade no preço fresco: nas duas direções o corte equivale a
+                    # não pagar menos de $0.40 pelo token comprado (YES<0.40 = LONG
+                    # contra tendência; NO<0.40 = YES>0.60 = SHORT contra tendência).
+                    # Mesmos limiares NO_FADE_HI/LO (0.60/0.40) do filtro da decisão.
+                    min_entry = max(min_entry, 0.40)
+                if not (min_entry <= fresh_price <= max_entry):
+                    logger.warning(
+                        f"  🔒 ABORTADA por preço fresco: {trade_label} agora a ${fresh_price:.3f}, "
+                        f"fora da faixa [${min_entry:.2f}–${max_entry:.2f}] (decisão usou ${trade_price:.3f} YES). "
+                        f"Mercado correu entre a decisão e o envio — sem ordem."
+                    )
+                    return
+                logger.info(f"  🔒 Preço fresco OK: {trade_label} a ${fresh_price:.3f} (faixa [${min_entry:.2f}–${max_entry:.2f}])")
 
             async def _place_order():
                 async with await AsyncSecureClient.create(
