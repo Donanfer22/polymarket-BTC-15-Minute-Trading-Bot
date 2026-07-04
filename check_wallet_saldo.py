@@ -1,16 +1,16 @@
 """
 Diagnóstico de carteira/saldo da Polymarket.
 
-Compara DUAS formas de inicializar o AsyncSecureClient:
-  1. AUTO-DERIVADO  -> create(private_key=pk)            (exatamente como o bot.py faz hoje)
-  2. EXPLICITO      -> create(private_key=pk, wallet=FUNDER)
+Compara o endereço da EOA (derivado do POLYMARKET_PK) com o POLYMARKET_FUNDER,
+e mostra o wallet_type / saldo que o SDK enxerga ao fazer
+AsyncSecureClient.create(private_key=pk, wallet=funder) — exatamente como o bot.
 
-Objetivo: descobrir se a carteira que o bot deriva sozinho é a MESMA onde
-está o seu USDC (o POLYMARKET_FUNDER do .env). Se forem diferentes, o bot lê
-saldo $0 e nunca entra, mesmo com dinheiro na conta.
+Objetivo: descobrir por que o pedido é rejeitado com
+"maker address not allowed, please use the deposit wallet flow".
+Causa provável: FUNDER aponta para a EOA (ou carteira errada) em vez da
+carteira de depósito (deposit wallet / POLY_1271).
 
-Rodar DENTRO do container do bot no VPS (lá o SDK 'polymarket' está instalado
-e as variáveis do .env já estão no ambiente). Veja o comando no NOTES.md.
+Rodar DENTRO do container do bot no VPS. Veja o comando no NOTES.md.
 """
 import os
 import asyncio
@@ -18,7 +18,7 @@ import asyncio
 
 pk = os.getenv("POLYMARKET_PK", "")
 pk = ("0x" + pk) if pk and not pk.startswith("0x") else pk
-funder = os.getenv("POLYMARKET_FUNDER", "")
+funder = os.getenv("POLYMARKET_FUNDER", "") or None
 
 
 def mask(a):
@@ -26,47 +26,52 @@ def mask(a):
     return (a[:6] + "..." + a[-4:]) if len(a) >= 10 else (a or "(vazio)")
 
 
-def dump(client):
-    """Imprime os atributos relevantes do client (nomes variam por versão do SDK)."""
-    for attr in ("funder", "wallet", "proxy", "address", "signer_address",
-                 "wallet_type", "balance", "allowance"):
-        if hasattr(client, attr):
+# Endereço da EOA derivado da private key
+try:
+    from eth_account import Account
+    eoa = Account.from_key(pk).address
+except Exception as e:
+    eoa = f"<erro ao derivar EOA: {e}>"
+
+
+def dump(c):
+    for attr in ("wallet_type", "funder", "wallet", "proxy", "address",
+                 "signer_address", "maker", "balance", "allowance"):
+        if hasattr(c, attr):
             try:
-                print(f"   {attr}: {getattr(client, attr)}")
+                print(f"   {attr}: {getattr(c, attr)}")
             except Exception as e:
                 print(f"   {attr}: <erro: {e}>")
+    for meth in ("is_gasless_ready",):
+        if hasattr(c, meth):
+            try:
+                print(f"   {meth}(): {getattr(c, meth)()}")
+            except Exception as e:
+                print(f"   {meth}(): <erro: {e}>")
 
 
-async def check(label, **kwargs):
+async def main():
     from polymarket import AsyncSecureClient
-    print(f"\n=== {label} ===")
+
+    print("EOA (derivado do PK):", mask(eoa))
+    print("FUNDER (.env/env):  ", mask(funder))
+    same = isinstance(eoa, str) and funder and eoa.lower() == funder.lower()
+    print("EOA == FUNDER? ->", bool(same),
+          "  <<< se True, ESSE é o bug (FUNDER deveria ser a deposit wallet, não a EOA)")
+
+    print("\n=== create(wallet=funder) [exatamente como o bot faz] ===")
     try:
-        async with await AsyncSecureClient.create(private_key=pk, **kwargs) as client:
-            client = await client.setup_gasless_wallet()
-            res = await client.get_balance_allowance(asset_type="COLLATERAL")
+        async with await AsyncSecureClient.create(private_key=pk, wallet=funder) as c:
+            res = await c.get_balance_allowance(asset_type="COLLATERAL")
             print("   get_balance_allowance ->", res)
-            dump(client)
+            dump(c)
     except Exception as e:
         import traceback
         traceback.print_exc()
         print("   ERRO:", e)
 
-
-async def main():
-    print("PK presente:", "sim" if pk else "NAO (POLYMARKET_PK vazio!)")
-    print("FUNDER (.env):", mask(funder))
-
-    # 1. Como o bot faz hoje (deriva a carteira sozinho)
-    await check("AUTO-DERIVADO (como o bot.py faz: create SEM wallet)")
-
-    # 2. Passando o funder explicitamente
-    if funder:
-        await check("EXPLICITO (create COM wallet=FUNDER)", wallet=funder)
-    else:
-        print("\n(POLYMARKET_FUNDER vazio no .env — pulei o teste explícito.)")
-
-    print("\n>>> Compare: a carteira do AUTO-DERIVADO é a mesma do FUNDER?")
-    print(">>> E qual das duas mostra o saldo de USDC que você depositou?")
+    print("\n>>> wallet_type deveria indicar DEPOSIT WALLET (POLY_1271).")
+    print(">>> Se for EOA, ou se EOA==FUNDER, achamos o problema do 'maker not allowed'.")
 
 
 if __name__ == "__main__":
