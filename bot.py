@@ -346,6 +346,7 @@ class IntegratedBTCStrategy(Strategy):
 
     def on_start(self):
         """Called when strategy starts - LOAD ALL MARKETS AND SUBSCRIBE IMMEDIATELY"""
+        self._startup_ok = True  # sinaliza ao watchdog de startup que a conexao concluiu
         logger.info("=" * 80)
         logger.info("INTEGRATED BTC STRATEGY STARTED - FIXED VERSION")
         logger.info("=" * 80)
@@ -2055,6 +2056,29 @@ def run_integrated_bot(simulation: bool = False, enable_grafana: bool = True, te
     node.trader.add_strategy(strategy)
     node.build()
     logger.info("Nautilus node built successfully")
+
+    # Watchdog de STARTUP: a fase de conexao (websocket + carga dos mercados por slug)
+    # roda ANTES do on_start da estrategia — ou seja, antes do watchdog normal ser armado.
+    # Se travar aqui, o container fica "Up" mas morto, invisivel pro Docker (2 redeploys
+    # manuais em 04/07). Se o on_start nao chegar no prazo, mata o processo e o
+    # Docker (restart: unless-stopped) tenta de novo do zero.
+    import threading as _threading
+    startup_timeout = int(os.getenv("STARTUP_WATCHDOG_TIMEOUT_S", "300"))
+
+    def _vigiar_startup():
+        inicio = time.time()
+        while time.time() - inicio < startup_timeout:
+            time.sleep(10)
+            if getattr(strategy, "_startup_ok", False):
+                return
+        logger.critical(
+            f"🐶 WATCHDOG DE STARTUP: on_start nao chegou em {startup_timeout}s "
+            f"(travou na conexao/carga de mercados) — matando o processo p/ o Docker reiniciar"
+        )
+        os._exit(1)
+
+    _threading.Thread(target=_vigiar_startup, daemon=True, name="watchdog-startup").start()
+    logger.info(f"🐶 Watchdog de startup ativo (limite de {startup_timeout}s ate o on_start)")
 
     print()
     print("=" * 80)
